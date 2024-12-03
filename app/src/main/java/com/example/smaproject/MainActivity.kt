@@ -13,7 +13,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,11 +38,19 @@ fun DefrosterApp() {
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
         override fun onSensorChanged(event: SensorEvent) {
             if (event.sensor.type == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-                defrostViewModel.currentTemp.floatValue = event.values[0]
+                var newAmbientTemp = event.values[0]
                 Log.i(
                     "Defroster App",
-                    "Ambient temperature changed to: ${defrostViewModel.currentTemp.floatValue}."
+                    "Ambient temperature changed to: ${newAmbientTemp}."
                 )
+                if (newAmbientTemp < -273.15f) {
+                    Log.i(
+                        "Defroster App",
+                        "Abnormally low temperature received. Capping at absolute zero."
+                    )
+                    newAmbientTemp = -273.15f
+                }
+                defrostViewModel.currentTemp.floatValue = newAmbientTemp
             }
         }
     }
@@ -52,7 +59,7 @@ fun DefrosterApp() {
         sensorManager.registerListener(
             ambientTempSensorEventListener,
             ambientTempSensor,
-            SensorManager.SENSOR_DELAY_UI
+            SensorManager.SENSOR_DELAY_NORMAL
         )
         Log.i("Defroster App", "Registered ambient temperature sensor listener.")
     } else {

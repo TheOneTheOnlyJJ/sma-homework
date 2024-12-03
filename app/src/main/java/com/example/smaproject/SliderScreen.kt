@@ -69,7 +69,7 @@ fun SliderScreen(navController: NavController, defrostViewModel: DefrostViewMode
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "${defrostViewModel.currentTemp.floatValue.toInt()} °C",
+                        text = "${"%.2f".format(defrostViewModel.currentTemp.floatValue)} °C",
                         style = MaterialTheme.typography.headlineMedium,
                         fontSize = 50.sp
                     )
@@ -98,13 +98,9 @@ fun SliderScreen(navController: NavController, defrostViewModel: DefrostViewMode
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .height(50.dp),
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.primary,
-                            activeTrackColor = MaterialTheme.colorScheme.primary,
-                            inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        )
+                        enabled = defrostViewModel.isTargetTempSliderEnabled.value
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(0.9f),
                         horizontalArrangement = Arrangement.SpaceBetween

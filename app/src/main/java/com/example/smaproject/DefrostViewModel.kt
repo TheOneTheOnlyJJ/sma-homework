@@ -10,14 +10,17 @@ class DefrostViewModel : ViewModel() {
     val currentTemp = mutableFloatStateOf(0f)
     val targetTemp = mutableFloatStateOf(10f)
     val isDefrostingStarted = mutableStateOf(false)
+    val isTargetTempSliderEnabled = mutableStateOf(true)
     val backgroundColor = mutableStateOf(coldColor)
 
     fun toggleDefrosting() {
-        isDefrostingStarted.value = !isDefrostingStarted.value
-        if (isDefrostingStarted.value) {
-            backgroundColor.value = hotColor
+        this.isDefrostingStarted.value = !isDefrostingStarted.value
+        if (this.isDefrostingStarted.value) {
+            this.isTargetTempSliderEnabled.value = false
+            this.backgroundColor.value = this.hotColor
         } else {
-            backgroundColor.value = coldColor
+            this.isTargetTempSliderEnabled.value = true
+            this.backgroundColor.value = this.coldColor
         }
     }
 }
