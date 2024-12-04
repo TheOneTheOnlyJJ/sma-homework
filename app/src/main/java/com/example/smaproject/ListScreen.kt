@@ -37,7 +37,7 @@ fun ListScreen(navController: NavController, defrostViewModel: DefrostViewModel)
             .fillMaxSize()
             .background(Brush.radialGradient(
                 colors = listOf(Color.White, defrostViewModel.backgroundColor.value),
-                radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 2f
+                radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
             ))
             .padding(16.dp)
     ) {

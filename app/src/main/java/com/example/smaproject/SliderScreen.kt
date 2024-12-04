@@ -26,7 +26,7 @@ fun SliderScreen(navController: NavController, defrostViewModel: DefrostViewMode
             .fillMaxSize()
             .background(Brush.radialGradient(
                 colors = listOf(Color.White, defrostViewModel.backgroundColor.value),
-                radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 2f
+                radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
             ))
             .padding(16.dp)
     ) {
@@ -94,10 +94,8 @@ fun SliderScreen(navController: NavController, defrostViewModel: DefrostViewMode
                     Slider(
                         value = defrostViewModel.targetTemp.floatValue,
                         onValueChange = { defrostViewModel.targetTemp.floatValue = it.roundToInt().toFloat() },
-                        valueRange = 10f..100f,
-                        modifier = Modifier
-                            .fillMaxWidth(0.9f)
-                            .height(50.dp),
+                        valueRange = 10f..90f,
+                        modifier = Modifier.fillMaxWidth(0.9f),
                         enabled = defrostViewModel.isTargetTempSliderEnabled.value
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -105,11 +103,11 @@ fun SliderScreen(navController: NavController, defrostViewModel: DefrostViewMode
                         modifier = Modifier.fillMaxWidth(0.9f),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        for (i in 10..100 step 10) {
+                        for (i in 10..90 step 10) {
                             Text(
                                 text = i.toString(),
                                 style = MaterialTheme.typography.bodySmall,
-                                fontSize = 18.sp
+                                fontSize = 20.sp
                             )
                         }
                     }
@@ -124,7 +122,7 @@ fun SliderScreen(navController: NavController, defrostViewModel: DefrostViewMode
                             }
                         },
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth(0.9f)
                             .padding(vertical = 8.dp)
                     ) {
                         Text(if (defrostViewModel.isDefrostingStarted.value) "Stop" else "Start", fontSize = 25.sp)

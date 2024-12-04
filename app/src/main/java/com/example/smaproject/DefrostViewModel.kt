@@ -4,8 +4,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 
 class DefrostViewModel : ViewModel() {
-    private val coldColor = Color(0xffdcf3ff)
-    private val hotColor = Color(0xfffde0e0)
+    private val coldColor = Color(0xffa2f2f0)
+//    0xffdcf3ff
+    private val hotColor = Color(0xffff9a90)
+//    0xfffde0e0
 
     val currentTemp = mutableFloatStateOf(0f)
     val targetTemp = mutableFloatStateOf(10f)
