@@ -1,6 +1,6 @@
 package com.example.smaproject
 
-import DefrostViewModel
+import DefrosterViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,7 +25,7 @@ import java.util.Calendar
 import java.util.Locale
 
 @Composable
-fun ListScreen(navController: NavController, defrostViewModel: DefrostViewModel) {
+fun ListScreen(navController: NavController, defrosterViewModel: DefrosterViewModel) {
     val items = listOf(
         ItemData(getDaysAgo(1), 42),
         ItemData(getDaysAgo(2), 35),
@@ -36,7 +36,7 @@ fun ListScreen(navController: NavController, defrostViewModel: DefrostViewModel)
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.radialGradient(
-                colors = listOf(Color.White, defrostViewModel.backgroundColor.value),
+                colors = listOf(Color.White, defrosterViewModel.backgroundColor.value),
                 radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
             ))
             .padding(16.dp)

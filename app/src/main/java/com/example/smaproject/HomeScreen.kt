@@ -1,6 +1,6 @@
 package com.example.smaproject
 
-import DefrostViewModel
+import DefrosterViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,13 +20,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun HomeScreen(navController: NavController, defrostViewModel: DefrostViewModel) {
+fun HomeScreen(navController: NavController, defrosterViewModel: DefrosterViewModel) {
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.radialGradient(
-                colors = listOf(Color.White, defrostViewModel.backgroundColor.value),
+                colors = listOf(Color.White, defrosterViewModel.backgroundColor.value),
                 radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
             ))
             .padding(16.dp),

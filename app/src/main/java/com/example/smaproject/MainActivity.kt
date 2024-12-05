@@ -1,6 +1,6 @@
 package com.example.smaproject
 
-import DefrostViewModel
+import DefrosterViewModel
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DefrosterApp() {
-    val defrostViewModel: DefrostViewModel = viewModel()
+    val defrosterViewModel: DefrosterViewModel = viewModel()
     val navController = rememberNavController()
     val sensorManager: SensorManager = LocalContext.current.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val ambientTempSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
@@ -40,35 +40,35 @@ fun DefrosterApp() {
             if (event.sensor.type == Sensor.TYPE_AMBIENT_TEMPERATURE) {
                 var newAmbientTemp = event.values[0]
                 Log.i(
-                    "Defroster App",
+                    "Defroster",
                     "Ambient temperature changed to: ${newAmbientTemp}."
                 )
                 if (newAmbientTemp < -273.15f) {
                     Log.i(
-                        "Defroster App",
-                        "Abnormally low temperature received. Capping at absolute zero."
+                        "Defroster",
+                        "Abnormally low ambient temperature received. Capping at absolute zero."
                     )
                     newAmbientTemp = -273.15f
                 }
-                defrostViewModel.currentTemp.floatValue = newAmbientTemp
+                defrosterViewModel.currentTemp.floatValue = newAmbientTemp
             }
         }
     }
     if (ambientTempSensor != null) {
-        Log.i("Defroster App", "Registering ambient temperature sensor listener.")
+        Log.i("Defroster", "Registering ambient temperature sensor listener.")
         sensorManager.registerListener(
             ambientTempSensorEventListener,
             ambientTempSensor,
             SensorManager.SENSOR_DELAY_NORMAL
         )
-        Log.i("Defroster App", "Registered ambient temperature sensor listener.")
+        Log.i("Defroster", "Registered ambient temperature sensor listener.")
     } else {
-        Log.i("Defroster App", "Null ambient temperature sensor.")
+        Log.i("Defroster", "Null ambient temperature sensor.")
     }
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen(navController, defrostViewModel) }
-        composable("slider") { SliderScreen(navController, defrostViewModel) }
-        composable("list") { ListScreen(navController, defrostViewModel) }
+        composable("home") { HomeScreen(navController, defrosterViewModel) }
+        composable("slider") { SliderScreen(navController, defrosterViewModel) }
+        composable("list") { ListScreen(navController, defrosterViewModel) }
     }
 }
 
