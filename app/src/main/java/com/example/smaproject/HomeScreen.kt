@@ -20,13 +20,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun HomeScreen(navController: NavController, defrosterViewModel: DefrosterViewModel) {
-
+fun HomeScreen(
+    navController: NavController,
+    defrosterViewModel: DefrosterViewModel,
+    backgroundColors: Map<HeatingState, Color>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.radialGradient(
-                colors = listOf(Color.White, defrosterViewModel.backgroundColor.value),
+                colors = listOf(Color.White, backgroundColors[defrosterViewModel.heatingState]!!),
                 radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
             ))
             .padding(16.dp),
@@ -41,7 +44,7 @@ fun HomeScreen(navController: NavController, defrosterViewModel: DefrosterViewMo
                 text = "Defroster",
                 style = MaterialTheme.typography.headlineLarge,
                 fontSize = 70.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

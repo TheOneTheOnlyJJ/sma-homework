@@ -1,80 +1,65 @@
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.viewModelScope
+import com.example.smaproject.HeatingState
+import com.example.smaproject.HeatingStatsTracker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
+import java.math.BigInteger
 
 class DefrosterViewModel : ViewModel() {
-    private val coldColor = Color(0xffa2f2f0)
-    private val hotColor = Color(0xffff9a90)
-
-    val currentTemp = mutableFloatStateOf(0f)
-    val targetTemp = mutableFloatStateOf(10f)
-    val toggleHeatingButtonText = mutableStateOf("Start")
-    val isToggleHeatingButtonEnabled = mutableStateOf(true)
-    private val isHeatingStarted = mutableStateOf(false)
-    val isTargetTempSliderEnabled = mutableStateOf(true)
-    val backgroundColor = mutableStateOf(coldColor)
+    var currentTemp by mutableFloatStateOf(0f)
+    var targetTemp by mutableIntStateOf(10)
+    var heatingState by mutableStateOf(HeatingState.NOT_HEATING)
+        private set
     private val heatingThreads = mutableStateListOf<Thread>()
     private val stopHeatingTrigger = MutableStateFlow(false)
+    private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
 
     init {
         observeStopHeatingTrigger()
-        observeTempChanges()
     }
 
     private fun observeStopHeatingTrigger() {
-        CoroutineScope(Dispatchers.Default).launch {
+        viewModelScope.launch {
             stopHeatingTrigger.collectLatest { shouldStop ->
                 if (shouldStop) {
                     stopHeating()
+                    stopHeatingTrigger.update { false }
                 }
             }
         }
     }
 
-    private fun observeTempChanges() {
-        val currentTempFlow = snapshotFlow { currentTemp.floatValue }
-        val targetTempFlow = snapshotFlow { targetTemp.floatValue }
-
-        CoroutineScope(Dispatchers.Default).launch {
-            combine(
-                currentTempFlow,
-                targetTempFlow
-            ) { current, target ->
-                target.roundToInt() > current
-            }.collectLatest { isTargetTempGreaterThanCurrentTemp ->
-                isToggleHeatingButtonEnabled.value = isTargetTempGreaterThanCurrentTemp
-            }
-        }
-    }
-
     fun toggleHeating() {
-        this.isHeatingStarted.value = !isHeatingStarted.value
-        if (this.isHeatingStarted.value) {
-            this.startHeating()
-        } else {
-            this.stopHeatingTrigger.value = true
+        when (this.heatingState) {
+            HeatingState.NOT_HEATING -> {
+                this.startHeating()
+            }
+            HeatingState.HEATING -> {
+                this.stopHeating()
+            }
+            else -> {
+                throw RuntimeException("Should not toggle heating while stopping heating")
+            }
         }
     }
 
     private fun startHeating() {
         Log.i(
             "Defroster",
-            "Starting heating with target temperature of ${this.targetTemp.floatValue.roundToInt()} °C."
+            "Starting heating with target temperature of ${this.targetTemp} °C."
         )
-        this.toggleHeatingButtonText.value = "Stop"
-        this.isTargetTempSliderEnabled.value = false
-        this.backgroundColor.value = this.hotColor
+        this.heatingState = HeatingState.HEATING
+        this.heatingStatsTracker.startTracking(this.currentTemp, this.targetTemp)
         val availableProcessors = Runtime.getRuntime().availableProcessors()
         Log.i("Defroster", "Device has $availableProcessors available processors.")
         for (i in 1..availableProcessors) {
@@ -83,21 +68,21 @@ class DefrosterViewModel : ViewModel() {
                 val iterationCycleLoops = 10_000_000
                 try {
                     Log.i(logTag, "Starting.")
-                    var currentIterationCycle = 0UL
+                    var currentIterationCycle = BigInteger.ZERO
                     var meaninglessCounter: Int
-                    while (this.currentTemp.floatValue < this.targetTemp.floatValue) {
+                    while (this.currentTemp < this.targetTemp) {
                         meaninglessCounter = 0
                         for (j in 0..iterationCycleLoops) {
                             meaninglessCounter += 1
                         }
-                        currentIterationCycle += 1U
+                        currentIterationCycle = currentIterationCycle.add(BigInteger.ONE)
                         Log.i(logTag, "Completed iteration cycle no. $currentIterationCycle.")
                         if (Thread.currentThread().isInterrupted) {
                             throw InterruptedException()
                         }
                     }
                     Log.i(logTag, "Reached target temperature.")
-                    this.stopHeatingTrigger.value = true
+                    this.stopHeatingTrigger.update { true }
                 } catch (e: InterruptedException) {
                     Log.i(logTag, "Interrupted. Stopping.")
                 }
@@ -109,21 +94,15 @@ class DefrosterViewModel : ViewModel() {
 
     private fun stopHeating() {
         Log.i("Defroster", "Stopping heating.")
-        this.toggleHeatingButtonText.value = "Stopping..."
-        this.isToggleHeatingButtonEnabled.value = false
+        this.heatingState = HeatingState.STOPPING_HEATING
         for (thread in this.heatingThreads) {
             thread.interrupt()
             thread.join()
         }
         this.heatingThreads.clear()
         Log.i("Defroster", "All heating threads stopped.")
-        this.isHeatingStarted.value = false
-        this.stopHeatingTrigger.value = false
-        this.isTargetTempSliderEnabled.value = true
-        this.backgroundColor.value = this.coldColor
-        if (this.targetTemp.floatValue.roundToInt() > this.currentTemp.floatValue) {
-            this.isToggleHeatingButtonEnabled.value = true
-        }
-        this.toggleHeatingButtonText.value = "Start"
+        this.heatingState = HeatingState.NOT_HEATING
+        val heatingStats = this.heatingStatsTracker.stopTracking(this.currentTemp)
+        Log.i("Defroster", "Heating stats: ${heatingStats}.")
     }
 }
