@@ -1,4 +1,7 @@
+package com.example.smaproject
+
 import android.util.Log
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -6,38 +9,20 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.smaproject.HeatingState
-import com.example.smaproject.HeatingStatsTracker
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.math.BigInteger
 
 class DefrosterViewModel : ViewModel() {
     var currentTemp by mutableFloatStateOf(0f)
     var targetTemp by mutableIntStateOf(10)
+    private val targetTempTolerance = 2
+    val targetTempLowerLimit by derivedStateOf { this.targetTemp - this.targetTempTolerance }
+    val targetTempUpperLimit by derivedStateOf { this.targetTemp + this.targetTempTolerance }
     var heatingState by mutableStateOf(HeatingState.NOT_HEATING)
         private set
+    private val heatingThreadIterationCycleLoopCount = 100_000_000
+    private val heatingThreadSleepTime = 5_000L
     private val heatingThreads = mutableStateListOf<Thread>()
-    private val stopHeatingTrigger = MutableStateFlow(false)
     private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
-
-    init {
-        observeStopHeatingTrigger()
-    }
-
-    private fun observeStopHeatingTrigger() {
-        viewModelScope.launch {
-            stopHeatingTrigger.collectLatest { shouldStop ->
-                if (shouldStop) {
-                    stopHeating()
-                    stopHeatingTrigger.update { false }
-                }
-            }
-        }
-    }
 
     fun toggleHeating() {
         when (this.heatingState) {
@@ -53,6 +38,58 @@ class DefrosterViewModel : ViewModel() {
         }
     }
 
+    private fun runHeatingCycle() {
+        var meaninglessCounter = 0
+        for (j in 0..this.heatingThreadIterationCycleLoopCount) {
+            meaninglessCounter += 1
+        }
+    }
+
+    private fun heatingThreadImplementation(logTag: String) {
+        var heatingCycle = BigInteger.ZERO
+        var doRunHeating: Boolean
+        var isInActiveHeatingMode = true
+        Log.i(logTag, "Starting.")
+        try {
+            while (true) {
+                if (Thread.currentThread().isInterrupted) {
+                    throw InterruptedException()
+                }
+                if (isInActiveHeatingMode) {
+                    if (this.currentTemp >= this.targetTempUpperLimit) {
+                        // Exit active heating mode when temperature reaches or exceeds upper limit
+                        doRunHeating = false
+                        isInActiveHeatingMode = false
+                        Log.i(logTag, "Current temp. reached upper limit. Exiting active heating mode.")
+                    } else {
+                        // Continue heating until upper limit is reached
+                        doRunHeating = true
+                    }
+                } else {
+                    if (this.currentTemp < this.targetTempLowerLimit) {
+                        // Re-enter active heating mode when temperature drops below lower limit
+                        doRunHeating = true
+                        isInActiveHeatingMode = true
+                        Log.i(logTag, "Current temp. below lower limit. Re-entering active heating mode.")
+                    } else {
+                        // Maintain sleep state while within tolerance range
+                        doRunHeating = false
+                    }
+                }
+                if (doRunHeating) {
+                    this.runHeatingCycle()
+                    heatingCycle = heatingCycle.add(BigInteger.ONE)
+                    Log.i(logTag, "Completed heating cycle no. $heatingCycle.")
+                } else {
+                    Log.i(logTag, "Going to sleep ${this.heatingThreadSleepTime} ms.")
+                    Thread.sleep(this.heatingThreadSleepTime)
+                }
+            }
+        } catch (e: InterruptedException) {
+            Log.i(logTag, "Interrupted. Stopping.")
+        }
+    }
+
     private fun startHeating() {
         Log.i(
             "Defroster",
@@ -64,28 +101,7 @@ class DefrosterViewModel : ViewModel() {
         Log.i("Defroster", "Device has $availableProcessors available processors.")
         for (i in 1..availableProcessors) {
             val newHeatingThread = Thread {
-                val logTag = "Defroster Heating Thread No. $i"
-                val iterationCycleLoops = 10_000_000
-                try {
-                    Log.i(logTag, "Starting.")
-                    var currentIterationCycle = BigInteger.ZERO
-                    var meaninglessCounter: Int
-                    while (this.currentTemp < this.targetTemp) {
-                        meaninglessCounter = 0
-                        for (j in 0..iterationCycleLoops) {
-                            meaninglessCounter += 1
-                        }
-                        currentIterationCycle = currentIterationCycle.add(BigInteger.ONE)
-                        Log.i(logTag, "Completed iteration cycle no. $currentIterationCycle.")
-                        if (Thread.currentThread().isInterrupted) {
-                            throw InterruptedException()
-                        }
-                    }
-                    Log.i(logTag, "Reached target temperature.")
-                    this.stopHeatingTrigger.update { true }
-                } catch (e: InterruptedException) {
-                    Log.i(logTag, "Interrupted. Stopping.")
-                }
+                this.heatingThreadImplementation("Defroster Heating Thread No. $i")
             }
             this.heatingThreads.add(newHeatingThread)
             newHeatingThread.start()

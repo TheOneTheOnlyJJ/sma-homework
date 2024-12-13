@@ -1,6 +1,5 @@
 package com.example.smaproject
 
-import DefrosterViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -40,18 +39,38 @@ fun SliderScreen(
     val targetTempColor by remember { derivedStateOf {
         lerp(coldColor, hotColor, defrosterViewModel.targetTemp.mapToRange(30f, 70f))
     } }
+    val targetTempDisabledColor by remember { derivedStateOf {
+        lerp(targetTempColor, backgroundColors[defrosterViewModel.heatingState]!!, 0.5f)
+    } }
     var targetTempSliderValue by remember { mutableFloatStateOf(
         defrosterViewModel.targetTemp.toFloat()
     ) }
+    val hintTextText by remember { derivedStateOf {
+        if (
+            defrosterViewModel.targetTemp <= defrosterViewModel.currentTemp
+            && defrosterViewModel.heatingState == HeatingState.NOT_HEATING
+            ) {
+            "Target temp. must exceed current"
+        } else {
+            "Keeps temp. between ${
+                defrosterViewModel.targetTempLowerLimit
+            } and ${
+                defrosterViewModel.targetTempUpperLimit
+            } °C"
+        }
+    } }
+    val isToggleHeatingButtonEnabled by remember { derivedStateOf {
+        when (defrosterViewModel.heatingState) {
+            HeatingState.HEATING -> true
+            HeatingState.STOPPING_HEATING -> false
+            HeatingState.NOT_HEATING -> defrosterViewModel.targetTemp > defrosterViewModel.currentTemp
+        }
+    } }
     val toggleHeatingButtonText by remember { derivedStateOf {
         when (defrosterViewModel.heatingState) {
-            HeatingState.HEATING -> {
-                return@derivedStateOf "Stop"
-            }
-            HeatingState.STOPPING_HEATING -> {
-                return@derivedStateOf "Stopping"
-            }
-            else -> return@derivedStateOf "Start"
+            HeatingState.HEATING -> "Stop"
+            HeatingState.STOPPING_HEATING -> "Stopping"
+            HeatingState.NOT_HEATING -> "Start"
         }
     } }
 
@@ -141,7 +160,9 @@ fun SliderScreen(
                         enabled = defrosterViewModel.heatingState != HeatingState.HEATING,
                         colors = SliderDefaults.colors(
                             thumbColor = targetTempColor,
-                            activeTrackColor = targetTempColor
+                            activeTrackColor = targetTempColor,
+                            disabledThumbColor = targetTempDisabledColor,
+                            disabledActiveTrackColor = targetTempDisabledColor
                         )
                     )
                     Spacer(modifier = Modifier.height(4.dp))
@@ -159,17 +180,22 @@ fun SliderScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = hintTextText,
+                        fontSize = 20.sp,
+                        color = targetTempColor
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
                             defrosterViewModel.toggleHeating()
                         },
-                        enabled = defrosterViewModel.targetTemp > defrosterViewModel.currentTemp
-                                && defrosterViewModel.heatingState != HeatingState.STOPPING_HEATING,
+                        enabled = isToggleHeatingButtonEnabled,
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .padding(vertical = 8.dp)
                     ) {
-                        Text(toggleHeatingButtonText, fontSize = 25.sp)
+                        Text(text = toggleHeatingButtonText, fontSize = 25.sp)
                     }
 
                 }
