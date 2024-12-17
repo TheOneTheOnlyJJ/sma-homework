@@ -52,9 +52,9 @@ fun SliderScreen(
             ) {
             "Target temp. must exceed current"
         } else {
-            "Keeps temp. between ${
+            "Keeps temp. at ${
                 defrosterViewModel.targetTempLowerLimit
-            } and ${
+            } – ${
                 defrosterViewModel.targetTempUpperLimit
             } °C"
         }
@@ -165,24 +165,24 @@ fun SliderScreen(
                             disabledActiveTrackColor = targetTempDisabledColor
                         )
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(0.9f),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        for (i in 10..90 step 10) {
-                            Text(
-                                text = i.toString(),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontSize = 20.sp,
-                                color = lerp(coldColor, hotColor, i.mapToRange(30f, 70f))
-                            )
-                        }
-                    }
+//                    Spacer(modifier = Modifier.height(4.dp))
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(0.9f),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        for (i in 10..90 step 10) {
+//                            Text(
+//                                text = i.toString(),
+//                                style = MaterialTheme.typography.bodySmall,
+//                                fontSize = 20.sp,
+//                                color = lerp(coldColor, hotColor, i.mapToRange(30f, 70f))
+//                            )
+//                        }
+//                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = hintTextText,
-                        fontSize = 20.sp,
+                        fontSize = 21.sp,
                         color = targetTempColor
                     )
                     Spacer(modifier = Modifier.height(16.dp))

@@ -50,6 +50,12 @@ class HeatingStatsTracker {
         if (!this.hasFinishedTracking()) {
             throw RuntimeException("Cannot get stats map while tracking not finished!")
         }
-        return HeatingStats(this.startTime!!, this.endTime!!, this.startTemp!!, this.targetTemp!!, this.endTemp!!)
+        return HeatingStats(
+            startTime = this.startTime!!,
+            endTime = this.endTime!!,
+            startTemp = this.startTemp!!,
+            targetTemp = this.targetTemp!!,
+            endTemp = this.endTemp!!
+        )
     }
 }
