@@ -1,14 +1,22 @@
 package com.example.smaproject
 
-import java.time.LocalDateTime
-import java.time.Duration
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
+@Entity(tableName = "heating_stats")
 data class HeatingStats(
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    val id: Long = 0,
+    @ColumnInfo(name = "start_time")
+    val startTime: String,
+    @ColumnInfo(name = "end_time")
+    val endTime: String,
+    @ColumnInfo(name = "start_temp")
     val startTemp: Float,
+    @ColumnInfo(name = "target_temp")
     val targetTemp: Int,
+    @ColumnInfo(name = "end_temp")
     val endTemp: Float
-) {
-    val duration: Duration = Duration.between(this.startTime, this.endTime)
-}
+)

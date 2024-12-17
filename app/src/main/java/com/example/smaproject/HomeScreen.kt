@@ -74,7 +74,7 @@ fun HomeScreen(
                 Text("Defrost", fontSize = 25.sp)
             }
             Button(
-                onClick = { navController.navigate("list") },
+                onClick = { navController.navigate("activity") },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp)

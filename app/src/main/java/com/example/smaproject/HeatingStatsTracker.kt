@@ -1,14 +1,17 @@
 package com.example.smaproject
 
 import android.util.Log
-import java.time.LocalDateTime
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.Date
 
 class HeatingStatsTracker {
-    private var startTime: LocalDateTime? = null
-    private var endTime: LocalDateTime? = null
+    private var startTime: Date? = null
+    private var endTime: Date? = null
     private var startTemp: Float? = null
     private var targetTemp: Int? = null
     private var endTemp: Float? = null
+    private val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.US)
 
     private fun hasStartedTracking(): Boolean {
         return this.startTime != null && this.startTemp != null && this.targetTemp != null
@@ -20,7 +23,7 @@ class HeatingStatsTracker {
 
     fun startTracking(startTemp: Float, targetTemp: Int) {
         Log.i("Heating Tracker", "Starting tracking heating.")
-        this.startTime = LocalDateTime.now()
+        this.startTime = Date.from(Instant.now())
         this.startTemp = startTemp
         this.targetTemp = targetTemp
     }
@@ -30,7 +33,7 @@ class HeatingStatsTracker {
             throw RuntimeException("Cannot stop tracking while tracking not started!")
         }
         Log.i("Heating Tracker", "Stopping tracking heating.")
-        this.endTime = LocalDateTime.now()
+        this.endTime = Date.from(Instant.now())
         this.endTemp = endTemp
         val heatingStats =  this.getStatsMap()
         this.clearTrackingStats()
@@ -51,8 +54,8 @@ class HeatingStatsTracker {
             throw RuntimeException("Cannot get stats map while tracking not finished!")
         }
         return HeatingStats(
-            startTime = this.startTime!!,
-            endTime = this.endTime!!,
+            startTime = this.formatter.format(this.startTime!!),
+            endTime = this.formatter.format(this.endTime!!),
             startTemp = this.startTemp!!,
             targetTemp = this.targetTemp!!,
             endTemp = this.endTemp!!

@@ -9,29 +9,43 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val defrosterViewModel: DefrosterViewModel by viewModels()
+        try {
+            val defrosterDatabase = Room.databaseBuilder(
+                applicationContext,
+                DefrosterDatabase::class.java,
+                "defroster-database"
+            ).build()
+            defrosterViewModel.heatingStatsDao = defrosterDatabase.heatingStatsDao()
+            Log.i("Defroster", "Initialised Defroster Database.")
+        } catch (e: Exception) {
+            Log.e(
+                "Defroster",
+                "Could not initialise Defroster Database: $e."
+            )
+        }
         setContent {
-            DefrosterApp()
+            DefrosterApp(defrosterViewModel)
         }
     }
 }
 
 @Composable
-fun DefrosterApp() {
-    val defrosterViewModel: DefrosterViewModel = viewModel()
+fun DefrosterApp(defrosterViewModel: DefrosterViewModel) {
     val navController = rememberNavController()
     val backgroundColors = remember { mapOf(
         HeatingState.HEATING to Color(0xFFFFB3B3),
@@ -112,7 +126,7 @@ fun DefrosterApp() {
             defrosterViewModel,
             backgroundColors
         ) }
-        composable("list") { ListScreen(
+        composable("activity") { ActivityScreen(
             navController,
             defrosterViewModel,
             backgroundColors
@@ -120,8 +134,8 @@ fun DefrosterApp() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    DefrosterApp()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    DefrosterApp()
+//}

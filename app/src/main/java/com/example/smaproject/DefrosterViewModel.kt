@@ -9,6 +9,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.math.BigInteger
 
 class DefrosterViewModel : ViewModel() {
@@ -23,6 +26,7 @@ class DefrosterViewModel : ViewModel() {
     private val heatingThreadSleepTime = 5_000L
     private val heatingThreads = mutableStateListOf<Thread>()
     private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
+    var heatingStatsDao: HeatingStatsDao? = null
 
     fun toggleHeating() {
         when (this.heatingState) {
@@ -117,8 +121,26 @@ class DefrosterViewModel : ViewModel() {
         }
         this.heatingThreads.clear()
         Log.i("Defroster", "All heating threads stopped.")
-        this.heatingState = HeatingState.NOT_HEATING
         val heatingStats = this.heatingStatsTracker.stopTracking(this.currentTemp)
         Log.i("Defroster", "Heating stats: ${heatingStats}.")
+        if (this.heatingStatsDao != null) {
+            Log.i("Defroster", "Launching database insertion coroutine.")
+            CoroutineScope(Dispatchers.IO).launch {
+                Log.i(
+                    "Defroster Database Insertion Coroutine",
+                    "Inserting heating stats.")
+                val insertedId = heatingStatsDao!!.insert(heatingStats)
+                Log.i(
+                    "Defroster Database Insertion Coroutine",
+                    "Inserted heating stats. Inserted ID: $insertedId."
+                )
+            }
+        } else {
+            Log.i(
+                "Defroster",
+                "Heating Stats DAO is null. Cannot insert new heating stats into Defroster database."
+            )
+        }
+        this.heatingState = HeatingState.NOT_HEATING
     }
 }
