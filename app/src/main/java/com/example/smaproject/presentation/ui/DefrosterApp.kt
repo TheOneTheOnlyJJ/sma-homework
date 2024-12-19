@@ -7,25 +7,17 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.smaproject.domain.HeatingState
-import com.example.smaproject.presentation.DefrosterViewModel
+import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
 
 @Composable
 fun DefrosterApp() {
     val defrosterViewModel: DefrosterViewModel = hiltViewModel()
     val navController = rememberNavController()
-    val backgroundColors = remember { mapOf(
-        HeatingState.HEATING to Color(0xFFFFB3B3),
-        HeatingState.STOPPING_HEATING to Color(0xFFFFB3B3),
-        HeatingState.NOT_HEATING to Color(0xFFA2F2F0)
-    ) }
     val sensorManager: SensorManager = LocalContext.current.getSystemService(
         Context.SENSOR_SERVICE
     ) as SensorManager
@@ -90,20 +82,14 @@ fun DefrosterApp() {
     }
 
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { HomeScreen(
-            navController,
-            defrosterViewModel,
-            backgroundColors
-        ) }
-        composable("slider") { SliderScreen(
-            navController,
-            defrosterViewModel,
-            backgroundColors
-        ) }
-        composable("activity") { ActivityScreen(
-            navController,
-            defrosterViewModel,
-            backgroundColors
-        ) }
+        composable("home") {
+            HomeScreen(navController, defrosterViewModel)
+        }
+        composable("defrost") {
+            DefrostScreen(navController,defrosterViewModel)
+        }
+        composable("activity") {
+            ActivityScreen(navController, defrosterViewModel)
+        }
     }
 }

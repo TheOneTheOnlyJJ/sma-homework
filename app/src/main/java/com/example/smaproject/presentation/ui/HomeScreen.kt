@@ -10,74 +10,68 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.smaproject.R
-import com.example.smaproject.domain.HeatingState
-import com.example.smaproject.presentation.DefrosterViewModel
+import com.example.smaproject.presentation.theme.coldColor
+import com.example.smaproject.presentation.theme.getBackgroundColorGradient
+import com.example.smaproject.presentation.theme.hotColor
+import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    defrosterViewModel: DefrosterViewModel,
-    backgroundColors: Map<HeatingState, Color>
+    defrosterViewModel: DefrosterViewModel
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.radialGradient(
-                colors = listOf(Color.White, backgroundColors[defrosterViewModel.heatingState]!!),
-                radius = maxOf(
-                    LocalConfiguration.current.screenWidthDp,
-                    LocalConfiguration.current.screenHeightDp
-                ).toFloat() * 3f
-            ))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(getBackgroundColorGradient(defrosterViewModel.heatingState))
+            .padding(16.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.Center)
         ) {
             Text(
                 text = "Defroster",
-                style = MaterialTheme.typography.headlineLarge,
-                fontSize = 70.sp,
                 textAlign = TextAlign.Center,
+                style = TextStyle(
+                    fontSize = 70.sp,
+                    fontWeight = FontWeight.Bold,
+                    brush = Brush.horizontalGradient(
+                        colorStops = arrayOf(0.1f to coldColor, 0.9f to hotColor)
+                    )
+                )
             )
             Spacer(modifier = Modifier.height(8.dp))
-        }
-        Image(
-            painter = painterResource(id = R.drawable.defroster_icon),
-            contentDescription = "Defroster Image",
-            modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .aspectRatio(1f)
-        )
-        Text(
-            text = "Your portable defroster\nWhen snow can't melt fast enough",
-            style = MaterialTheme.typography.headlineSmall,
-            fontSize = 23.sp,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+            Image(
+                painter = painterResource(id = R.drawable.defroster_icon),
+                contentDescription = "Defroster Image",
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .aspectRatio(1f)
+            )
+            Text(
+                text = "When snow can’t melt fast enough",
+                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { navController.navigate("slider") },
+                onClick = { navController.navigate("defrost") },
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp)
             ) {
-                Text("Defrost", fontSize = 25.sp)
+                Text(text = "Defrost", fontSize = 25.sp)
             }
             Button(
                 onClick = { navController.navigate("activity") },
@@ -85,7 +79,7 @@ fun HomeScreen(
                     .fillMaxWidth(0.9f)
                     .padding(vertical = 8.dp)
             ) {
-                Text("Activity", fontSize = 25.sp)
+                Text(text = "Activity", fontSize = 25.sp)
             }
         }
     }

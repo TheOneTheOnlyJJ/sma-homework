@@ -1,6 +1,5 @@
 package com.example.smaproject.presentation.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DoubleArrow
 import androidx.compose.material3.Card
@@ -20,13 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.smaproject.data.HeatingStats
-import com.example.smaproject.presentation.DefrosterViewModel
+import com.example.smaproject.domain.dateTimePattern
+import com.example.smaproject.presentation.theme.getTempColor
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -35,34 +35,14 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HeatingStatsCard(
     heatingStats: HeatingStats,
-    defrosterViewModel: DefrosterViewModel,
-    onClick: () -> Unit,
     onLongClick: () -> Unit,
     isSelected: Boolean
 ) {
-    fun Float.mapToRange(min: Float, max: Float): Float {
-        return (this - min) / (max - min)
-    }
-    fun Int.mapToRange(min: Float, max: Float): Float {
-        return (this - min) / (max - min)
-    }
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss")
+    val startTempColor = getTempColor(heatingStats.startTemp)
+    val endTempColor = getTempColor(heatingStats.endTemp)
+    val targetTempColor = getTempColor(heatingStats.targetTemp)
 
-    val startTempColor = lerp(
-        defrosterViewModel.coldColor,
-        defrosterViewModel.hotColor,
-        heatingStats.startTemp.mapToRange(30f, 70f)
-    )
-    val endTempColor = lerp(
-        defrosterViewModel.coldColor,
-        defrosterViewModel.hotColor,
-        heatingStats.endTemp.mapToRange(30f, 70f)
-    )
-    val targetTempColor = lerp(
-        defrosterViewModel.coldColor,
-        defrosterViewModel.hotColor,
-        heatingStats.targetTemp.mapToRange(30f, 70f)
-    )
+    val formatter = DateTimeFormatter.ofPattern(dateTimePattern)
     val duration = Duration.between(
         LocalDateTime.parse(heatingStats.startTime, formatter),
         LocalDateTime.parse(heatingStats.endTime, formatter)
@@ -82,11 +62,18 @@ fun HeatingStatsCard(
             .fillMaxWidth()
             .padding(8.dp)
             .combinedClickable(
-                onClick = onClick,
+                onClick = {},
                 onLongClick = onLongClick,
                 onClickLabel = "Delete Heating Stats"
             ),
-        border = if (isSelected) BorderStroke(1.0.dp, Color.Red) else CardDefaults.outlinedCardBorder(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.surfaceVariant
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        ),
+        border = CardDefaults.outlinedCardBorder(enabled = isSelected)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -94,30 +81,46 @@ fun HeatingStatsCard(
                 text = "Defrost #${heatingStats.id}",
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 25.sp,
+                fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = "${"%.2f".format(heatingStats.startTemp)} °C",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = 30.sp,
-                    color = startTempColor
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "${"%.2f".format(heatingStats.startTemp)} °C",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = startTempColor
+                    )
+                }
                 Icon(
                     imageVector = Icons.Rounded.DoubleArrow,
-                    contentDescription = "Start to end temperature icon"
+                    contentDescription = "Start to end temperature icon",
+                    modifier = Modifier.padding(horizontal = 8.dp).size(32.dp)
                 )
-                Text(
-                    text = "${"%.2f".format(heatingStats.endTemp)} °C",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = 30.sp,
-                    color = endTempColor
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "${"%.2f".format(heatingStats.endTemp)} °C",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = endTempColor
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -134,6 +137,7 @@ fun HeatingStatsCard(
                     text= "${heatingStats.targetTemp} °C",
                     style = MaterialTheme.typography.bodyLarge,
                     color = targetTempColor,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
             }

@@ -12,7 +12,7 @@ class HeatingStatsTracker {
     private var startTemp: Float? = null
     private var targetTemp: Int? = null
     private var endTemp: Float? = null
-    private val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", java.util.Locale.US)
+    private val formatter = SimpleDateFormat(dateTimePattern, java.util.Locale.US)
 
     private fun hasStartedTracking(): Boolean {
         return this.startTime != null && this.startTemp != null && this.targetTemp != null

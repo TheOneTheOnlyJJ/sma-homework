@@ -1,17 +1,24 @@
 package com.example.smaproject.presentation.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -20,24 +27,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.smaproject.domain.HeatingState
 import com.example.smaproject.data.HeatingStats
-import com.example.smaproject.presentation.DefrosterViewModel
+import com.example.smaproject.presentation.theme.getBackgroundColorGradient
+import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityScreen(
     navController: NavController,
-    defrosterViewModel: DefrosterViewModel,
-    backgroundColors: Map<HeatingState, Color>
+    defrosterViewModel: DefrosterViewModel
 ) {
     val heatingStats by defrosterViewModel.heatingStatsFlow.collectAsStateWithLifecycle(
         initialValue = emptyList()
@@ -87,39 +91,65 @@ fun ActivityScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.radialGradient(
-                colors = listOf(Color.White, backgroundColors[defrosterViewModel.heatingState]!!),
-                radius = maxOf(
-                    LocalConfiguration.current.screenWidthDp,
-                    LocalConfiguration.current.screenHeightDp
-                ).toFloat() * 3f
-            ))
-            .padding(16.dp)
-    ) {
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.align(Alignment.TopStart)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back"
+    val scrollState = rememberLazyListState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        canScroll = { scrollState.canScrollForward || scrollState.canScrollBackward }
+    )
+
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back"
+                        )
+                    }
+                },
+                title = { Text("Activity") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    if (selectedHeatingStats.isNotEmpty()) {
+                        IconButton(onClick = {
+                            isDeleteHeatingStatsDialogOpen = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.DeleteForever,
+                                contentDescription = "Delete all selected heating stats"
+                            )
+                        }
+                    }
+                    IconButton(onClick = {
+                        if (defrosterViewModel.isHeatingCardListReversed) {
+                            Log.i("Defroster", "Un-reversing heating stats list.")
+                            defrosterViewModel.isHeatingCardListReversed = false
+                        } else {
+                            Log.i("Defroster", "Reversing heating stats list.")
+                            defrosterViewModel.isHeatingCardListReversed = true
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Rounded.SwapVert,
+                            contentDescription = "Reverse heating stats list"
+                        )
+                    }
+                },
             )
         }
-        Column(
+    ) {
+        innerPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(getBackgroundColorGradient(defrosterViewModel.heatingState))
+                .padding(innerPadding)
         ) {
-            Text(
-                text = "Activity",
-                style = MaterialTheme.typography.headlineMedium,
-                fontSize = 32.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
             if (heatingStats.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
@@ -135,25 +165,21 @@ fun ActivityScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    state = scrollState
                 ) {
                     items(heatingStats.size) { index ->
                         HeatingStatsCard(
-                            heatingStats = heatingStats[index],
-                            defrosterViewModel = defrosterViewModel,
-                            onClick = {
+                            heatingStats = if (defrosterViewModel.isHeatingCardListReversed)
+                                heatingStats.reversed()[index]
+                            else heatingStats[index],
+                            onLongClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 if (selectedHeatingStats.contains(heatingStats[index])) {
                                     selectedHeatingStats.remove(heatingStats[index])
                                 } else {
                                     selectedHeatingStats.add(heatingStats[index])
                                 }
-                            },
-                            onLongClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                if (!selectedHeatingStats.contains(heatingStats[index])) {
-                                    selectedHeatingStats.add(heatingStats[index])
-                                }
-                                isDeleteHeatingStatsDialogOpen = true
                             },
                             isSelected = selectedHeatingStats.contains(heatingStats[index])
                         )

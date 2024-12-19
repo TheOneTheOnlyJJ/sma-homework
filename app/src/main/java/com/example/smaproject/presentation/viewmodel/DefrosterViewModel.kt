@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation
+package com.example.smaproject.presentation.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.derivedStateOf
@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.smaproject.data.HeatingStats
 import com.example.smaproject.data.HeatingStatsDao
@@ -26,8 +25,6 @@ import javax.inject.Inject
 class DefrosterViewModel @Inject constructor(
     private val heatingStatsDao: HeatingStatsDao
 ) : ViewModel() {
-    val coldColor = Color(0xFF257ca3)
-    val hotColor = Color(0xFFDC143C)
     var currentTemp by mutableFloatStateOf(0f)
     var targetTemp by mutableIntStateOf(10)
     private val targetTempTolerance = 2
@@ -40,6 +37,8 @@ class DefrosterViewModel @Inject constructor(
     private val heatingThreads = mutableStateListOf<Thread>()
     private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
     val heatingStatsFlow: Flow<List<HeatingStats>> = heatingStatsDao.loadAll()
+
+    var isHeatingCardListReversed by mutableStateOf(false)
 
     fun toggleHeating() {
         when (this.heatingState) {

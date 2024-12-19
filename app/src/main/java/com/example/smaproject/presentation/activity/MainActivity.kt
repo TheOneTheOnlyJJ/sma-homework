@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation
+package com.example.smaproject.presentation.activity
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -15,9 +15,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    DefrosterApp()
-//}
