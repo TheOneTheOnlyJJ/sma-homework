@@ -1,4 +1,4 @@
-package com.example.smaproject
+package com.example.smaproject.presentation.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.smaproject.domain.HeatingState
+import com.example.smaproject.presentation.DefrosterViewModel
 import kotlin.math.roundToInt
 
 @Composable
@@ -23,9 +25,6 @@ fun SliderScreen(
     defrosterViewModel: DefrosterViewModel,
     backgroundColors: Map<HeatingState, Color>
 ) {
-    val coldColor = remember { Color(0xFF257ca3) }
-    val hotColor = remember { Color(0xFFDC143C) }
-
     fun Float.mapToRange(min: Float, max: Float): Float {
         return (this - min) / (max - min)
     }
@@ -34,10 +33,17 @@ fun SliderScreen(
     }
 
     val currentTempColor by remember { derivedStateOf {
-        lerp(coldColor, hotColor, defrosterViewModel.currentTemp.mapToRange(30f, 70f))
+        lerp(
+            defrosterViewModel.coldColor,
+            defrosterViewModel.hotColor,
+            defrosterViewModel.currentTemp.mapToRange(30f, 70f)
+        )
     } }
     val targetTempColor by remember { derivedStateOf {
-        lerp(coldColor, hotColor, defrosterViewModel.targetTemp.mapToRange(30f, 70f))
+        lerp(defrosterViewModel.coldColor,
+            defrosterViewModel.hotColor,
+            defrosterViewModel.targetTemp.mapToRange(30f, 70f)
+        )
     } }
     val targetTempDisabledColor by remember { derivedStateOf {
         lerp(targetTempColor, backgroundColors[defrosterViewModel.heatingState]!!, 0.5f)
@@ -79,7 +85,10 @@ fun SliderScreen(
             .fillMaxSize()
             .background(Brush.radialGradient(
                 colors = listOf(Color.White, backgroundColors[defrosterViewModel.heatingState]!!),
-                radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
+                radius = maxOf(
+                    LocalConfiguration.current.screenWidthDp,
+                    LocalConfiguration.current.screenHeightDp
+                ).toFloat() * 3f
             ))
             .padding(16.dp)
     ) {
@@ -165,20 +174,6 @@ fun SliderScreen(
                             disabledActiveTrackColor = targetTempDisabledColor
                         )
                     )
-//                    Spacer(modifier = Modifier.height(4.dp))
-//                    Row(
-//                        modifier = Modifier.fillMaxWidth(0.9f),
-//                        horizontalArrangement = Arrangement.SpaceBetween
-//                    ) {
-//                        for (i in 10..90 step 10) {
-//                            Text(
-//                                text = i.toString(),
-//                                style = MaterialTheme.typography.bodySmall,
-//                                fontSize = 20.sp,
-//                                color = lerp(coldColor, hotColor, i.mapToRange(30f, 70f))
-//                            )
-//                        }
-//                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = hintTextText,

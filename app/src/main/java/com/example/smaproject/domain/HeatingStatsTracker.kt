@@ -1,6 +1,7 @@
-package com.example.smaproject
+package com.example.smaproject.domain
 
 import android.util.Log
+import com.example.smaproject.data.HeatingStats
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Date

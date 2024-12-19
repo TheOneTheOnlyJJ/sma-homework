@@ -1,4 +1,4 @@
-package com.example.smaproject
+package com.example.smaproject.data
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -14,5 +14,5 @@ interface HeatingStatsDao {
     @Query("SELECT * FROM heating_stats")
     fun loadAll(): Flow<List<HeatingStats>>
     @Delete
-    fun delete(heatingStats: HeatingStats): Int
+    fun delete(vararg heatingStats: HeatingStats): Int
 }

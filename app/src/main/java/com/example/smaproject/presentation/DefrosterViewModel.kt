@@ -1,4 +1,4 @@
-package com.example.smaproject
+package com.example.smaproject.presentation
 
 import android.util.Log
 import androidx.compose.runtime.derivedStateOf
@@ -8,13 +8,26 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import com.example.smaproject.data.HeatingStats
+import com.example.smaproject.data.HeatingStatsDao
+import com.example.smaproject.domain.HeatingState
+import com.example.smaproject.domain.HeatingStatsTracker
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.math.BigInteger
+import javax.inject.Inject
 
-class DefrosterViewModel : ViewModel() {
+@HiltViewModel
+class DefrosterViewModel @Inject constructor(
+    private val heatingStatsDao: HeatingStatsDao
+) : ViewModel() {
+    val coldColor = Color(0xFF257ca3)
+    val hotColor = Color(0xFFDC143C)
     var currentTemp by mutableFloatStateOf(0f)
     var targetTemp by mutableIntStateOf(10)
     private val targetTempTolerance = 2
@@ -26,7 +39,7 @@ class DefrosterViewModel : ViewModel() {
     private val heatingThreadSleepTime = 5_000L
     private val heatingThreads = mutableStateListOf<Thread>()
     private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
-    var heatingStatsDao: HeatingStatsDao? = null
+    val heatingStatsFlow: Flow<List<HeatingStats>> = heatingStatsDao.loadAll()
 
     fun toggleHeating() {
         when (this.heatingState) {
@@ -37,7 +50,7 @@ class DefrosterViewModel : ViewModel() {
                 this.stopHeating()
             }
             else -> {
-                throw RuntimeException("Should not toggle heating while stopping heating")
+                throw RuntimeException("Should not toggle heating while stopping heating!")
             }
         }
     }
@@ -108,7 +121,9 @@ class DefrosterViewModel : ViewModel() {
                 this.heatingThreadImplementation("Defroster Heating Thread No. $i")
             }
             this.heatingThreads.add(newHeatingThread)
-            newHeatingThread.start()
+        }
+        for (i in 0..<this.heatingThreads.size) {
+            this.heatingThreads[i].start()
         }
     }
 
@@ -117,30 +132,39 @@ class DefrosterViewModel : ViewModel() {
         this.heatingState = HeatingState.STOPPING_HEATING
         for (thread in this.heatingThreads) {
             thread.interrupt()
+        }
+        for (thread in this.heatingThreads) {
             thread.join()
         }
         this.heatingThreads.clear()
         Log.i("Defroster", "All heating threads stopped.")
         val heatingStats = this.heatingStatsTracker.stopTracking(this.currentTemp)
         Log.i("Defroster", "Heating stats: ${heatingStats}.")
-        if (this.heatingStatsDao != null) {
-            Log.i("Defroster", "Launching database insertion coroutine.")
-            CoroutineScope(Dispatchers.IO).launch {
-                Log.i(
-                    "Defroster Database Insertion Coroutine",
-                    "Inserting heating stats.")
-                val insertedId = heatingStatsDao!!.insert(heatingStats)
-                Log.i(
-                    "Defroster Database Insertion Coroutine",
-                    "Inserted heating stats. Inserted ID: $insertedId."
-                )
-            }
-        } else {
+        Log.i("Defroster", "Launching database insertion coroutine.")
+        CoroutineScope(Dispatchers.IO).launch {
             Log.i(
-                "Defroster",
-                "Heating Stats DAO is null. Cannot insert new heating stats into Defroster database."
+                "Defroster Database Insertion Coroutine",
+                "Inserting heating stats.")
+            val insertedId = heatingStatsDao.insert(heatingStats)
+            Log.i(
+                "Defroster Database Insertion Coroutine",
+                "Inserted heating stats. Inserted ID: $insertedId."
             )
         }
         this.heatingState = HeatingState.NOT_HEATING
+    }
+
+    fun deleteHeatingStats(vararg heatingStats: HeatingStats) {
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.i(
+                "Defroster Database Deletion Coroutine",
+                "Deleting heating stats."
+            )
+            val deletedId = heatingStatsDao.delete(*heatingStats)
+            Log.i(
+                "Defroster Database Deletion Coroutine",
+                "Deleted heating stats. Entries deleted: $deletedId."
+            )
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.smaproject
+package com.example.smaproject.presentation.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.smaproject.R
+import com.example.smaproject.domain.HeatingState
+import com.example.smaproject.presentation.DefrosterViewModel
 
 @Composable
 fun HomeScreen(
@@ -29,7 +32,10 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Brush.radialGradient(
                 colors = listOf(Color.White, backgroundColors[defrosterViewModel.heatingState]!!),
-                radius = maxOf(LocalConfiguration.current.screenWidthDp, LocalConfiguration.current.screenHeightDp).toFloat() * 3f
+                radius = maxOf(
+                    LocalConfiguration.current.screenWidthDp,
+                    LocalConfiguration.current.screenHeightDp
+                ).toFloat() * 3f
             ))
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

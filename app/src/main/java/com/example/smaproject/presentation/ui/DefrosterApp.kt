@@ -1,51 +1,25 @@
-package com.example.smaproject
+package com.example.smaproject.presentation.ui
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val defrosterViewModel: DefrosterViewModel by viewModels()
-        try {
-            val defrosterDatabase = Room.databaseBuilder(
-                applicationContext,
-                DefrosterDatabase::class.java,
-                "defroster-database"
-            ).build()
-            defrosterViewModel.heatingStatsDao = defrosterDatabase.heatingStatsDao()
-            Log.i("Defroster", "Initialised Defroster Database.")
-        } catch (e: Exception) {
-            Log.e(
-                "Defroster",
-                "Could not initialise Defroster Database: $e."
-            )
-        }
-        setContent {
-            DefrosterApp(defrosterViewModel)
-        }
-    }
-}
+import com.example.smaproject.domain.HeatingState
+import com.example.smaproject.presentation.DefrosterViewModel
 
 @Composable
-fun DefrosterApp(defrosterViewModel: DefrosterViewModel) {
+fun DefrosterApp() {
+    val defrosterViewModel: DefrosterViewModel = hiltViewModel()
     val navController = rememberNavController()
     val backgroundColors = remember { mapOf(
         HeatingState.HEATING to Color(0xFFFFB3B3),
@@ -133,9 +107,3 @@ fun DefrosterApp(defrosterViewModel: DefrosterViewModel) {
         ) }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    DefrosterApp()
-//}
