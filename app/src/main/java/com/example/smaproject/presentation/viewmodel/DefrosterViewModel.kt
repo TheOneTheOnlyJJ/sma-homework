@@ -157,7 +157,7 @@ class DefrosterViewModel @Inject constructor(
         CoroutineScope(Dispatchers.IO).launch {
             Log.i(
                 "Defroster Database Deletion Coroutine",
-                "Deleting heating stats."
+                "Deleting heating stats with IDs: ${heatingStats.map { it.id }}."
             )
             val deletedId = heatingStatsDao.delete(*heatingStats)
             Log.i(

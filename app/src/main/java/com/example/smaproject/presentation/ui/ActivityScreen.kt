@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +34,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.smaproject.data.HeatingStats
 import com.example.smaproject.presentation.theme.getBackgroundColorGradient
 import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,10 +47,16 @@ fun ActivityScreen(
     val heatingStats by defrosterViewModel.heatingStatsFlow.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
-    val selectedHeatingStats = remember { mutableStateListOf<HeatingStats>() }
-    val haptics = LocalHapticFeedback.current
+    val selectedHeatingStatsIds = remember { mutableStateListOf<Long>() }
 
     var isDeleteHeatingStatsDialogOpen by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    val scrollState = rememberLazyListState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+        canScroll = { scrollState.canScrollForward || scrollState.canScrollBackward }
+    )
 
     when {
         isDeleteHeatingStatsDialogOpen -> {
@@ -67,21 +74,30 @@ fun ActivityScreen(
                     Text("Are you sure you want to delete the selected heating stats?")
                 },
                 onDismissRequest = {
-                    selectedHeatingStats.clear()
+                    selectedHeatingStatsIds.clear()
                     isDeleteHeatingStatsDialogOpen = false
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        defrosterViewModel.deleteHeatingStats(*selectedHeatingStats.toTypedArray())
-                        selectedHeatingStats.clear()
-                        isDeleteHeatingStatsDialogOpen = false
+                        scope.launch {
+                            val heatingStatsToDelete = heatingStats.filter {
+                                it.id in selectedHeatingStatsIds
+                            }
+                            if (heatingStatsToDelete.isNotEmpty()) {
+                                defrosterViewModel.deleteHeatingStats(
+                                    *heatingStatsToDelete.toTypedArray()
+                                )
+                                selectedHeatingStatsIds.clear()
+                                isDeleteHeatingStatsDialogOpen = false
+                            }
+                        }
                     }) {
                         Text("Delete")
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = {
-                        selectedHeatingStats.clear()
+                        selectedHeatingStatsIds.clear()
                         isDeleteHeatingStatsDialogOpen = false
                     }) {
                         Text("Dismiss")
@@ -90,11 +106,6 @@ fun ActivityScreen(
             )
         }
     }
-
-    val scrollState = rememberLazyListState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
-        canScroll = { scrollState.canScrollForward || scrollState.canScrollBackward }
-    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -115,7 +126,7 @@ fun ActivityScreen(
                 ),
                 scrollBehavior = scrollBehavior,
                 actions = {
-                    if (selectedHeatingStats.isNotEmpty()) {
+                    if (selectedHeatingStatsIds.isNotEmpty()) {
                         IconButton(onClick = {
                             isDeleteHeatingStatsDialogOpen = true
                         }) {
@@ -169,19 +180,23 @@ fun ActivityScreen(
                     state = scrollState
                 ) {
                     items(heatingStats.size) { index ->
+                        val currentHeatingStats = if (defrosterViewModel.isHeatingCardListReversed)
+                            heatingStats.reversed()[index]
+                        else
+                            heatingStats[index]
                         HeatingStatsCard(
-                            heatingStats = if (defrosterViewModel.isHeatingCardListReversed)
-                                heatingStats.reversed()[index]
-                            else heatingStats[index],
+                            heatingStats = currentHeatingStats,
                             onLongClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                if (selectedHeatingStats.contains(heatingStats[index])) {
-                                    selectedHeatingStats.remove(heatingStats[index])
-                                } else {
-                                    selectedHeatingStats.add(heatingStats[index])
+                                scope.launch {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    if (selectedHeatingStatsIds.contains(currentHeatingStats.id)) {
+                                        selectedHeatingStatsIds.remove(currentHeatingStats.id)
+                                    } else {
+                                        selectedHeatingStatsIds.add(currentHeatingStats.id)
+                                    }
                                 }
                             },
-                            isSelected = selectedHeatingStats.contains(heatingStats[index])
+                            isSelected = selectedHeatingStatsIds.contains(currentHeatingStats.id)
                         )
                     }
                 }
