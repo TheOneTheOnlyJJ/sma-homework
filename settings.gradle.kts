@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SMAProject"
+rootProject.name = "Defroster"
 include(":app")
  

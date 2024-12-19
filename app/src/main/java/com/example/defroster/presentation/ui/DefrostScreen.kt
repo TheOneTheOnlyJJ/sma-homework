@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation.ui
+package com.example.defroster.presentation.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,11 +13,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.smaproject.domain.HeatingState
-import com.example.smaproject.presentation.theme.getBackgroundColorGradient
-import com.example.smaproject.presentation.theme.getDisabledTempColor
-import com.example.smaproject.presentation.theme.getTempColor
-import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
+import com.example.defroster.domain.HeatingState
+import com.example.defroster.presentation.theme.getBackgroundColorGradient
+import com.example.defroster.presentation.theme.getDisabledTempColor
+import com.example.defroster.presentation.theme.getTempColor
+import com.example.defroster.presentation.viewmodel.DefrosterViewModel
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)

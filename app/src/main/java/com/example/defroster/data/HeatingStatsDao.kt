@@ -1,4 +1,4 @@
-package com.example.smaproject.data
+package com.example.defroster.data
 
 import androidx.room.Dao
 import androidx.room.Delete

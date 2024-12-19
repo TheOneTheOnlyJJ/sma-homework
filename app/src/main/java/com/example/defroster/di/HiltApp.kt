@@ -1,4 +1,4 @@
-package com.example.smaproject.di
+package com.example.defroster.di
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

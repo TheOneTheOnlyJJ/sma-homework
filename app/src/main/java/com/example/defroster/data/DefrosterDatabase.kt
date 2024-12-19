@@ -1,4 +1,4 @@
-package com.example.smaproject.data
+package com.example.defroster.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation.ui
+package com.example.defroster.presentation.ui
 
 import android.content.Context
 import android.hardware.Sensor
@@ -12,7 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
+import com.example.defroster.presentation.viewmodel.DefrosterViewModel
 
 @Composable
 fun DefrosterApp() {

@@ -1,11 +1,11 @@
-package com.example.smaproject.presentation.theme
+package com.example.defroster.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
-import com.example.smaproject.domain.HeatingState
+import com.example.defroster.domain.HeatingState
 
 val coldColor = Color(0xFF257ca3)
 val hotColor = Color(0xFFDC143C)

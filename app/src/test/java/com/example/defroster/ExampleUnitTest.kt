@@ -1,4 +1,4 @@
-package com.example.smaproject
+package com.example.defroster
 
 import org.junit.Test
 

@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.smaproject"
+    namespace = "com.example.defroster"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.smaproject"
+        applicationId = "com.example.defroster"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

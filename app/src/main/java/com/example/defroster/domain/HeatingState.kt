@@ -1,4 +1,4 @@
-package com.example.smaproject.domain
+package com.example.defroster.domain
 
 enum class HeatingState {
     HEATING, STOPPING_HEATING, NOT_HEATING

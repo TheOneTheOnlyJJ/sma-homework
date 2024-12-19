@@ -1,9 +1,9 @@
-package com.example.smaproject.di
+package com.example.defroster.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.smaproject.data.DefrosterDatabase
-import com.example.smaproject.data.HeatingStatsDao
+import com.example.defroster.data.DefrosterDatabase
+import com.example.defroster.data.HeatingStatsDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

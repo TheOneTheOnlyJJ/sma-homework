@@ -1,7 +1,7 @@
-package com.example.smaproject.domain
+package com.example.defroster.domain
 
 import android.util.Log
-import com.example.smaproject.data.HeatingStats
+import com.example.defroster.data.HeatingStats
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.util.Date

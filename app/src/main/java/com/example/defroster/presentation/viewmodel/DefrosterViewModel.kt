@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation.viewmodel
+package com.example.defroster.presentation.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.derivedStateOf
@@ -9,10 +9,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.smaproject.data.HeatingStats
-import com.example.smaproject.data.HeatingStatsDao
-import com.example.smaproject.domain.HeatingState
-import com.example.smaproject.domain.HeatingStatsTracker
+import com.example.defroster.data.HeatingStats
+import com.example.defroster.data.HeatingStatsDao
+import com.example.defroster.domain.HeatingState
+import com.example.defroster.domain.HeatingStatsTracker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

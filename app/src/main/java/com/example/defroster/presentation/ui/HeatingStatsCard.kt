@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation.ui
+package com.example.defroster.presentation.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -24,9 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.smaproject.data.HeatingStats
-import com.example.smaproject.domain.dateTimePattern
-import com.example.smaproject.presentation.theme.getTempColor
+import com.example.defroster.data.HeatingStats
+import com.example.defroster.domain.dateTimePattern
+import com.example.defroster.presentation.theme.getTempColor
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation.ui
+package com.example.defroster.presentation.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,11 +17,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.smaproject.R
-import com.example.smaproject.presentation.theme.coldColor
-import com.example.smaproject.presentation.theme.getBackgroundColorGradient
-import com.example.smaproject.presentation.theme.hotColor
-import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
+import com.example.defroster.presentation.theme.coldColor
+import com.example.defroster.presentation.theme.getBackgroundColorGradient
+import com.example.defroster.presentation.theme.hotColor
+import com.example.defroster.presentation.viewmodel.DefrosterViewModel
 
 @Composable
 fun HomeScreen(
@@ -51,7 +50,7 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Image(
-                painter = painterResource(id = R.drawable.defroster_icon),
+                painter = painterResource(id = com.example.defroster.R.drawable.defroster_icon),
                 contentDescription = "Defroster Image",
                 modifier = Modifier
                     .fillMaxWidth(0.6f)

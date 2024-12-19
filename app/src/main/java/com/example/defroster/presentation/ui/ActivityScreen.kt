@@ -1,4 +1,4 @@
-package com.example.smaproject.presentation.ui
+package com.example.defroster.presentation.ui
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -34,8 +34,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.smaproject.presentation.theme.getBackgroundColorGradient
-import com.example.smaproject.presentation.viewmodel.DefrosterViewModel
+import com.example.defroster.presentation.theme.getBackgroundColorGradient
+import com.example.defroster.presentation.viewmodel.DefrosterViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
