@@ -35,8 +35,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HeatingStatsCard(
     heatingStats: HeatingStats,
-    onLongClick: () -> Unit,
-    isSelected: Boolean
+    title: String,
+    onLongClick: () -> Unit = {},
+    isSelected: Boolean = false,
+    showSyncStatus: Boolean = false
 ) {
     val startTempColor = getTempColor(heatingStats.startTemp)
     val endTempColor = getTempColor(heatingStats.endTemp)
@@ -78,7 +80,7 @@ fun HeatingStatsCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "Defrost #${heatingStats.id}",
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = 25.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -192,22 +194,24 @@ fun HeatingStatsCard(
                     fontSize = 20.sp
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Cloud synced:",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontSize = 20.sp
-                )
-                Text(
-                    text = if (heatingStats.isSynced) "Yes" else "No",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontSize = 20.sp
-                )
+            if (showSyncStatus) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Cloud synced:",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 20.sp
+                    )
+                    Text(
+                        text = if (heatingStats.isSynced) "Yes" else "No",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 20.sp
+                    )
+                }
             }
         }
     }

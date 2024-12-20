@@ -9,8 +9,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.jurjandreigeorge.defroster.data.HeatingStats
 import com.jurjandreigeorge.defroster.data.firebase.FirebaseDefrosterDatabase
+import com.jurjandreigeorge.defroster.data.firebase.FirebaseHeatingStats
 import com.jurjandreigeorge.defroster.data.room.HeatingStatsDao
 import com.jurjandreigeorge.defroster.domain.HeatingState
 import com.jurjandreigeorge.defroster.domain.HeatingStatsTracker
@@ -38,16 +42,39 @@ class DefrosterViewModel @Inject constructor(
     private val heatingThreads = mutableStateListOf<Thread>()
     private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
     val nonDeletedHeatingStatsFlow: Flow<List<HeatingStats>> = heatingStatsDao.loadAllNonDeletedFlow()
+
     private val firebaseDatabase = FirebaseDefrosterDatabase()
+    var latestDefrost by mutableStateOf<HeatingStats?>(null)
+    private val latestDefrostListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            Log.i("Latest Defrost Listener", "Latest defrost changed.")
+            val rawData = dataSnapshot.getValue(FirebaseHeatingStats::class.java)
+            if (rawData != null) {
+                latestDefrost = rawData.toHeatingStats()
+            } else {
+                latestDefrost = null
+            }
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.w(
+                "Latest Defrost Listener",
+                "Error reading latest defrost data ${databaseError.toException()}."
+            )
+        }
+    }
 
     var isHeatingCardListReversed by mutableStateOf(false)
 
     init {
+        this.syncRoomDefrosterDatabaseWithFirebaseDefrosterDatabaseOfflineDifferences()
+        this.firebaseDatabase.getLatestDefrostDatabaseReference().addValueEventListener(
+            this.latestDefrostListener
+        )
         Log.i("Defroster", "Initialised DefrosterViewModel.")
-        this.syncRoomDefrosterDatabaseWithFirebaseDefrosterDatabase()
     }
 
-    private fun syncRoomDefrosterDatabaseWithFirebaseDefrosterDatabase() {
+    private fun syncRoomDefrosterDatabaseWithFirebaseDefrosterDatabaseOfflineDifferences() {
         CoroutineScope(Dispatchers.IO).launch {
             Log.i("Database Sync", "Start sync between Room and Firebase Defroster Database.")
             val unsyncedAndNonDeletedIds = heatingStatsDao.loadAllUnsyncedAndNonDeletedIds()
@@ -184,6 +211,9 @@ class DefrosterViewModel @Inject constructor(
                 }
             )
         }
+        firebaseDatabase.updateLatestDefrost(
+            heatingStats = heatingStats
+        )
     }
 
     private fun markHeatingStatsAsSynced(logTag: String, heatingStatsIds: List<Long>): Int {

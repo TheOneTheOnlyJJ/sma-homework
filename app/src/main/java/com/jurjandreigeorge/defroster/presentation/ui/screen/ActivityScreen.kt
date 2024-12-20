@@ -186,6 +186,7 @@ fun ActivityScreen(
                             nonDeletedHeatingStats[index]
                         HeatingStatsCard(
                             heatingStats = currentHeatingStats,
+                            title = "Defrost #${currentHeatingStats.id}",
                             onLongClick = {
                                 scope.launch {
                                     Log.i("Defroster Activity Screen", "Long click detected on heating stats ${currentHeatingStats.id} card.")
@@ -199,7 +200,8 @@ fun ActivityScreen(
                                     }
                                 }
                             },
-                            isSelected = selectedHeatingStatsIds.contains(currentHeatingStats.id)
+                            isSelected = selectedHeatingStatsIds.contains(currentHeatingStats.id),
+                            showSyncStatus = true
                         )
                     }
                 }

@@ -1,6 +1,7 @@
 package com.jurjandreigeorge.defroster.data.firebase
 
 import android.util.Log
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.jurjandreigeorge.defroster.data.HeatingStats
 
@@ -24,6 +25,34 @@ class FirebaseDefrosterDatabase {
 
     init {
         Log.i("Firebase Defroster Database", "Initialised Firebase Defroster Database.")
+    }
+
+    fun getLatestDefrostDatabaseReference(): DatabaseReference {
+        return this.database.child("latestDefrost")
+    }
+
+    fun updateLatestDefrost(
+        heatingStats: HeatingStats,
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {},
+        onCancelled: () -> Unit = {}
+    ) {
+        Log.i(this.logTag, "Updating latest defrost in Firebase Defroster Database.")
+        this.database
+            .child("latestDefrost")
+            .setValue(heatingStats.toFirebaseObject())
+            .addOnSuccessListener {
+                Log.i(this.logTag,"Latest defrost updated in Firebase Defroster Database")
+                onSuccess()
+            }
+            .addOnFailureListener {
+                Log.w(this.logTag,"Failed to update latest defrost in Firebase Defroster Database")
+                onFailure()
+            }
+            .addOnCanceledListener {
+                Log.w(this.logTag, "Cancelled updating latest defrost in Firebase Defroster Database")
+                onCancelled()
+            }
     }
 
     fun addHeatingStats(

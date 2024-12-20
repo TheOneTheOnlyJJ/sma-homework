@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import com.jurjandreigeorge.defroster.presentation.theme.coldColor
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.hotColor
+import com.jurjandreigeorge.defroster.presentation.ui.component.HeatingStatsCard
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
 
 @Composable
@@ -66,30 +67,34 @@ fun HomeScreen(
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
                     Log.i("Defroster Navigation", "Clicked on Defrost button.")
                     navController.navigate("defrost")
                     Log.i("Defroster Navigation", "Navigated to Defrost screen.")
                 },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(vertical = 8.dp)
+                modifier = Modifier.fillMaxWidth(0.9f)
             ) {
                 Text(text = "Defrost", fontSize = 25.sp)
             }
+            Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
                     Log.i("Defroster Navigation", "Clicked on Defrost button.")
                     navController.navigate("activity")
                     Log.i("Defroster Navigation", "Navigated to Activity screen.")
                 },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(vertical = 8.dp)
+                modifier = Modifier.fillMaxWidth(0.9f)
             ) {
                 Text(text = "Activity", fontSize = 25.sp)
+            }
+            if (defrosterViewModel.latestDefrost != null) {
+                Spacer(modifier = Modifier.height(32.dp))
+                HeatingStatsCard(
+                    heatingStats = defrosterViewModel.latestDefrost!!,
+                    title = "Latest Defrost"
+                )
             }
         }
     }
