@@ -215,6 +215,7 @@ class DefrosterViewModel @Inject constructor(
             heatingStats = heatingStats
         )
         // Will delete Firebase form this branch
+        // Update commit message duuh
     }
 
     private fun markHeatingStatsAsSynced(logTag: String, heatingStatsIds: List<Long>): Int {
