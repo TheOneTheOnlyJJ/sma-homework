@@ -45,7 +45,7 @@ fun ActivityScreen(
     navController: NavController,
     defrosterViewModel: DefrosterViewModel
 ) {
-    val nonDeletedHeatingStats by defrosterViewModel.nonDeletedHeatingStatsFlow.collectAsStateWithLifecycle(
+    val nonDeletedHeatingStats by defrosterViewModel.allHeatingStatsFlow.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
     val selectedHeatingStatsIds = remember { mutableStateListOf<Long>() }
@@ -200,8 +200,7 @@ fun ActivityScreen(
                                     }
                                 }
                             },
-                            isSelected = selectedHeatingStatsIds.contains(currentHeatingStats.id),
-                            showSyncStatus = true
+                            isSelected = selectedHeatingStatsIds.contains(currentHeatingStats.id)
                         )
                     }
                 }

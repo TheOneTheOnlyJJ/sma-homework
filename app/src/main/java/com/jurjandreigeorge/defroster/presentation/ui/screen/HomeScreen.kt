@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 import com.jurjandreigeorge.defroster.presentation.theme.coldColor
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.hotColor
-import com.jurjandreigeorge.defroster.presentation.ui.component.HeatingStatsCard
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
 
 @Composable
@@ -88,13 +87,6 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(0.9f)
             ) {
                 Text(text = "Activity", fontSize = 25.sp)
-            }
-            if (defrosterViewModel.latestDefrost != null) {
-                Spacer(modifier = Modifier.height(32.dp))
-                HeatingStatsCard(
-                    heatingStats = defrosterViewModel.latestDefrost!!,
-                    title = "Latest Defrost"
-                )
             }
         }
     }

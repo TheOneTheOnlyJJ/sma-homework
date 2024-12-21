@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "heating_stats")
-data class HeatingStats(
+data class HeatingStatsEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     val id: Long = 0,
@@ -25,9 +25,6 @@ data class HeatingStats(
     @ColumnInfo(name = "end_temp")
     val endTemp: Float,
 
-    @ColumnInfo(name = "is_synced")
-    val isSynced: Boolean = false,
-
-    @ColumnInfo(name = "is_deleted")
-    val isDeleted: Boolean = false
+    @ColumnInfo(name = "time_series")
+    val timeSeries: String
 )

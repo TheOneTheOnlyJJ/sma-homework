@@ -9,12 +9,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
-import com.jurjandreigeorge.defroster.data.HeatingStats
-import com.jurjandreigeorge.defroster.data.firebase.FirebaseDefrosterDatabase
-import com.jurjandreigeorge.defroster.data.firebase.FirebaseHeatingStats
+import com.jurjandreigeorge.defroster.data.HeatingStatsEntity
 import com.jurjandreigeorge.defroster.data.room.HeatingStatsDao
 import com.jurjandreigeorge.defroster.domain.HeatingState
 import com.jurjandreigeorge.defroster.domain.HeatingStatsTracker
@@ -40,63 +35,13 @@ class DefrosterViewModel @Inject constructor(
     private val heatingThreadIterationCycleLoopCount = 100_000_000
     private val heatingThreadSleepTime = 5_000L
     private val heatingThreads = mutableStateListOf<Thread>()
-    private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker()
-    val nonDeletedHeatingStatsFlow: Flow<List<HeatingStats>> = heatingStatsDao.loadAllNonDeletedFlow()
+    private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker(
+        getCurrentTemp = { this.currentTemp }
+    )
 
-    private val firebaseDatabase = FirebaseDefrosterDatabase()
-    var latestDefrost by mutableStateOf<HeatingStats?>(null)
-    private val latestDefrostListener = object : ValueEventListener {
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-            Log.i("Latest Defrost Listener", "Latest defrost changed.")
-            val rawData = dataSnapshot.getValue(FirebaseHeatingStats::class.java)
-            if (rawData != null) {
-                latestDefrost = rawData.toHeatingStats()
-            } else {
-                latestDefrost = null
-            }
-        }
-
-        override fun onCancelled(databaseError: DatabaseError) {
-            Log.w(
-                "Latest Defrost Listener",
-                "Error reading latest defrost data ${databaseError.toException()}."
-            )
-        }
-    }
+    val allHeatingStatsFlow: Flow<List<HeatingStatsEntity>> = heatingStatsDao.loadAllFlow()
 
     var isHeatingCardListReversed by mutableStateOf(false)
-
-    init {
-        this.syncRoomDefrosterDatabaseWithFirebaseDefrosterDatabaseOfflineDifferences()
-        this.firebaseDatabase.getLatestDefrostDatabaseReference().addValueEventListener(
-            this.latestDefrostListener
-        )
-        Log.i("Defroster", "Initialised DefrosterViewModel.")
-    }
-
-    private fun syncRoomDefrosterDatabaseWithFirebaseDefrosterDatabaseOfflineDifferences() {
-        CoroutineScope(Dispatchers.IO).launch {
-            Log.i("Database Sync", "Start sync between Room and Firebase Defroster Database.")
-            val unsyncedAndNonDeletedIds = heatingStatsDao.loadAllUnsyncedAndNonDeletedIds()
-            firebaseDatabase.addHeatingStats(
-                heatingStats = heatingStatsDao.loadByIds(unsyncedAndNonDeletedIds),
-                onSuccess = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        markHeatingStatsAsSynced("Mark As Synced", unsyncedAndNonDeletedIds)
-                    }
-                }
-            )
-            val syncedAndSoftDeletedIds = heatingStatsDao.loadAllSyncedAndSoftDeletedIds()
-            firebaseDatabase.deleteHeatingStats(
-                heatingStatsIds = syncedAndSoftDeletedIds,
-                onSuccess = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        deleteHeatingStatsFromRoom("Delete Synced", syncedAndSoftDeletedIds)
-                    }
-                }
-            )
-        }
-    }
 
     fun toggleHeating() {
         when (this.heatingState) {
@@ -170,7 +115,7 @@ class DefrosterViewModel @Inject constructor(
             "Starting heating with target temperature of ${this.targetTemp} °C."
         )
         this.heatingState = HeatingState.HEATING
-        this.heatingStatsTracker.startTracking(this.currentTemp, this.targetTemp)
+        this.heatingStatsTracker.startTracking(this.targetTemp)
         val availableProcessors = Runtime.getRuntime().availableProcessors()
         Log.i("Defroster", "Device has $availableProcessors available processors.")
         for (i in 1..availableProcessors) {
@@ -195,53 +140,19 @@ class DefrosterViewModel @Inject constructor(
         }
         this.heatingThreads.clear()
         Log.i("Defroster", "All heating threads stopped.")
-        val heatingStats = this.heatingStatsTracker.stopTracking(this.currentTemp)
+        val heatingStats = this.heatingStatsTracker.stopTracking()
         Log.i("Defroster", "Heating stats: ${heatingStats}.")
         this.heatingState = HeatingState.NOT_HEATING
         CoroutineScope(Dispatchers.IO).launch {
-            val insertedIds = heatingStatsDao.getIdsByRowIds(
-                insertHeatingStatsIntoRoom("Insert Heating Stats", listOf(heatingStats))
-            )
-            firebaseDatabase.addHeatingStats(
-                heatingStats = heatingStatsDao.loadByIds(insertedIds),
-                onSuccess = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        markHeatingStatsAsSynced("Mark As Synced", insertedIds)
-                    }
-                }
-            )
+            insertHeatingStatsIntoRoom(heatingStats = listOf(heatingStats))
         }
-        firebaseDatabase.updateLatestDefrost(
-            heatingStats = heatingStats
-        )
-        // Will delete Firebase form this branch
-        // Update commit message duuh
     }
 
-    private fun markHeatingStatsAsSynced(logTag: String, heatingStatsIds: List<Long>): Int {
-        Log.i(logTag, "Marking as synced heating stats with IDs: $heatingStatsIds.")
-        if (heatingStatsIds.isEmpty()) {
-            Log.i(logTag, "No heating stats to mark as synced.")
-            return 0
-        }
-        val markedAsSyncedCount = heatingStatsDao.markAsSyncedByIds(heatingStatsIds)
-        Log.i(logTag, "Heating stats marked as synced. Count: $markedAsSyncedCount.")
-        return markedAsSyncedCount
-    }
-
-    private fun markHeatingStatsAsDeleted(logTag: String, heatingStatsIds: List<Long>): Int {
-        Log.i(logTag, "Marking as deleted heating stats with IDs: $heatingStatsIds.")
-        if (heatingStatsIds.isEmpty()) {
-            Log.i(logTag, "No heating stats to mark as deleted.")
-            return 0
-        }
-        val markedAsDeletedCount = heatingStatsDao.markAsSoftDeletedByIds(heatingStatsIds)
-        Log.i(logTag, "Marked heating stats as deleted. Count: $markedAsDeletedCount.")
-        return markedAsDeletedCount
-    }
-
-    private fun insertHeatingStatsIntoRoom(logTag: String, heatingStats: List<HeatingStats>): List<Long> {
-        Log.i(logTag, "Inserting heating stats with IDs ${heatingStats.map { it.id }} into Room Defroster Database.")
+    private fun insertHeatingStatsIntoRoom(
+        logTag: String = "Insert Heating Stats",
+        heatingStats: List<HeatingStatsEntity>
+    ): List<Long> {
+        Log.i(logTag, "Inserting ${heatingStats.size} heating stats into Room Defroster Database.")
         if (heatingStats.isEmpty()) {
             Log.i(logTag, "No heating stats to insert.")
             return emptyList()
@@ -251,7 +162,10 @@ class DefrosterViewModel @Inject constructor(
         return insertedRowIds
     }
 
-    private fun deleteHeatingStatsFromRoom(logTag: String, heatingStatsIds: List<Long>): Int {
+    private fun deleteHeatingStatsFromRoom(
+        logTag: String = "Delete Heating Stats",
+        heatingStatsIds: List<Long>
+    ): Int {
         Log.i(logTag, "Deleting heating stats with IDs $heatingStatsIds from Room Defroster Database.")
         if (heatingStatsIds.isEmpty()) {
             Log.i(logTag, "No heating stats to delete.")
@@ -267,19 +181,7 @@ class DefrosterViewModel @Inject constructor(
             return
         }
         CoroutineScope(Dispatchers.IO).launch {
-            markHeatingStatsAsDeleted("Mark as Deleted", heatingStatsIds)
-            CoroutineScope(Dispatchers.IO).launch {
-                deleteHeatingStatsFromRoom("Delete Unsynced", heatingStatsDao.getUnsyncedIdsByIds(heatingStatsIds))
-            }
-            val syncedHeatingStatsIds = heatingStatsDao.getSyncedIdsByIds(heatingStatsIds)
-            firebaseDatabase.deleteHeatingStats(
-                heatingStatsIds = syncedHeatingStatsIds,
-                onSuccess = {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        deleteHeatingStatsFromRoom("Delete Synced", syncedHeatingStatsIds)
-                    }
-                }
-            )
+            deleteHeatingStatsFromRoom(heatingStatsIds = heatingStatsIds)
         }
     }
 }

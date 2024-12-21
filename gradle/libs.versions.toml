@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.1"
+composeCharts = "0.1.0"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -14,8 +15,6 @@ ksp = "2.0.0-1.0.24"
 hilt = "2.52"
 hiltAndroid = "2.52"
 hiltNavigationCompose = "1.2.0"
-googleServices = "4.4.2"
-firebaseBom = "33.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,9 +39,7 @@ dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = 
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidx-material-icons-extended = {  group = "androidx.compose.material", name = "material-icons-extended"}
-google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-google-firebase-database = { group = "com.google.firebase", name = "firebase-database" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -50,5 +47,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 

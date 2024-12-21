@@ -18,13 +18,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jurjandreigeorge.defroster.data.HeatingStats
+import com.jurjandreigeorge.defroster.data.HeatingStatsEntity
 import com.jurjandreigeorge.defroster.domain.dateTimePattern
 import com.jurjandreigeorge.defroster.presentation.theme.getTempColor
 import java.time.Duration
@@ -34,30 +35,29 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HeatingStatsCard(
-    heatingStats: HeatingStats,
+    heatingStats: HeatingStatsEntity,
     title: String,
     onLongClick: () -> Unit = {},
-    isSelected: Boolean = false,
-    showSyncStatus: Boolean = false
+    isSelected: Boolean = false
 ) {
-    val startTempColor = getTempColor(heatingStats.startTemp)
-    val endTempColor = getTempColor(heatingStats.endTemp)
-    val targetTempColor = getTempColor(heatingStats.targetTemp)
+    val startTempColor = remember { getTempColor(heatingStats.startTemp) }
+    val endTempColor = remember { getTempColor(heatingStats.endTemp) }
+    val targetTempColor = remember { getTempColor(heatingStats.targetTemp) }
 
-    val formatter = DateTimeFormatter.ofPattern(dateTimePattern)
-    val duration = Duration.between(
+    val formatter = remember { DateTimeFormatter.ofPattern(dateTimePattern) }
+    val duration = remember { Duration.between(
         LocalDateTime.parse(heatingStats.startTime, formatter),
         LocalDateTime.parse(heatingStats.endTime, formatter)
-    )
-    val hours = duration.toHours()
-    val minutes = duration.toMinutes() % 60
-    val seconds = duration.seconds % 60
+    ) }
+    val hours = remember { duration.toHours() }
+    val minutes = remember { duration.toMinutes() % 60 }
+    val seconds = remember { duration.seconds % 60 }
 
-    val formattedDuration = buildString {
+    val formattedDuration = remember { buildString {
         if (hours > 0) append("${hours}h ")
         if (minutes > 0) append("${minutes}m ")
         append("${seconds}s")
-    }.trim()
+    }.trim() }
 
     Card(
         modifier = Modifier
@@ -193,25 +193,6 @@ fun HeatingStatsCard(
                     style = MaterialTheme.typography.bodyLarge,
                     fontSize = 20.sp
                 )
-            }
-            if (showSyncStatus) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Cloud synced:",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontSize = 20.sp
-                    )
-                    Text(
-                        text = if (heatingStats.isSynced) "Yes" else "No",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontSize = 20.sp
-                    )
-                }
             }
         }
     }
