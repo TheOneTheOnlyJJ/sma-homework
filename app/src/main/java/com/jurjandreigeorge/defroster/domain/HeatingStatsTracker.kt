@@ -112,7 +112,8 @@ class HeatingStatsTracker(
             startTemp = this.startTemp!!,
             targetTemp = this.targetTemp!!,
             endTemp = this.endTemp!!,
-            timeSeries = this.timeSeries.toString()
+            timeSeriesTimestamps = this.timeSeries!!.map { it.key }.toString(),
+            timeSeriesTemps = this.timeSeries!!.map { it.value }.toString()
         )
     }
 }

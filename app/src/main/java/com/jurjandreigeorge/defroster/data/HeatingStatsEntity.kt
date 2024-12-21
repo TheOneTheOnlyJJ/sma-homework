@@ -25,6 +25,9 @@ data class HeatingStatsEntity(
     @ColumnInfo(name = "end_temp")
     val endTemp: Float,
 
-    @ColumnInfo(name = "time_series")
-    val timeSeries: String
+    @ColumnInfo(name = "time_series_timestamps")
+    val timeSeriesTimestamps: String,
+
+    @ColumnInfo(name = "time_series_temps")
+    val timeSeriesTemps: String
 )
