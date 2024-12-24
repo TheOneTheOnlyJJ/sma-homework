@@ -67,4 +67,5 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     ksp(libs.dagger.compiler)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.ycharts)
 }

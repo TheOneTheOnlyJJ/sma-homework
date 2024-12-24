@@ -9,31 +9,35 @@ import java.util.Timer
 import kotlin.concurrent.timerTask
 
 class HeatingStatsTracker(
-    private val getCurrentTemp: () -> Float
+    private val getCurrentTemp: () -> Float,
+    private val currentTempSamplingPeriodSeconds: Long = 5L
 ) {
     private var startTime: Date? = null
     private var endTime: Date? = null
     private var startTemp: Float? = null
     private var targetTemp: Int? = null
     private var endTemp: Float? = null
+    private var minTemp: Float? = null
+    private var maxTemp: Float? = null
     private var timeSeries: MutableMap<String, Float>? = null
     private val formatter = SimpleDateFormat(dateTimePattern, java.util.Locale.US)
     // Time series manipulation
+    private val currentTempSamplingPeriodMs = this.currentTempSamplingPeriodSeconds * 1000
     private var addToTimeSeriesTimer: Timer? = null
-    private val addToTimeSeriesPeriod: Long = 5_000L
 
     private fun hasStartedTracking(): Boolean {
         return this.startTime != null
                 && this.startTemp != null
                 && this.targetTemp != null
                 && this.timeSeries != null
+                && this.minTemp != null
+                && this.maxTemp != null
     }
 
     private fun hasStoppedTracking(): Boolean {
         return this.hasStartedTracking()
                 && this.endTime != null
                 && this.endTemp != null
-                && this.timeSeries != null
     }
 
     private fun hasClearedHeatingStats(): Boolean {
@@ -43,6 +47,8 @@ class HeatingStatsTracker(
                 && this.targetTemp == null
                 && this.endTemp == null
                 && this.timeSeries == null
+                && this.minTemp == null
+                && this.maxTemp == null
     }
 
     fun startTracking(targetTemp: Int) {
@@ -53,14 +59,16 @@ class HeatingStatsTracker(
         this.startTime = Date.from(Instant.now())
         this.startTemp = this.getCurrentTemp()
         this.targetTemp = targetTemp
-        this.timeSeries = mutableMapOf(this.formatter.format(this.startTime!!) to this.startTemp!!)
+        this.minTemp = this.startTemp!!
+        this.maxTemp = this.startTemp!!
+        this.timeSeries = mutableMapOf()
         this.addToTimeSeriesTimer = Timer()
         this.addToTimeSeriesTimer!!.schedule(
             timerTask {
                 addToTimeSeries(Date.from(Instant.now()), getCurrentTemp())
             },
-            this.addToTimeSeriesPeriod,
-            this.addToTimeSeriesPeriod
+            0,
+            this.currentTempSamplingPeriodMs
         )
         Log.i("Heating Tracker", "Started tracking heating.")
     }
@@ -77,7 +85,6 @@ class HeatingStatsTracker(
         // Add end time to series
         this.endTime = Date.from(Instant.now())
         this.endTemp = this.getCurrentTemp()
-        this.timeSeries!![this.formatter.format(this.endTime!!)] = this.endTemp!!
         Log.i("Heating Tracker", "Stopped tracking heating.")
         val heatingStats =  this.getStatsMap()
         this.clearTrackingStats()
@@ -91,6 +98,8 @@ class HeatingStatsTracker(
         this.startTemp = null
         this.targetTemp = null
         this.endTemp = null
+        this.minTemp = null
+        this.maxTemp = null
         this.timeSeries = null
     }
 
@@ -98,6 +107,14 @@ class HeatingStatsTracker(
         Log.i("Heating Tracker", "Adding to time series: $time, $temp.")
         if (!this.hasStartedTracking()) {
             throw RuntimeException("Cannot add to time series while tracking not started!")
+        }
+        if (temp < this.minTemp!!) {
+            this.minTemp = temp
+            Log.i("Heating Tracker", "New min temp: $minTemp.")
+        }
+        if (temp > this.maxTemp!!) {
+            this.maxTemp = temp
+            Log.i("Heating Tracker", "New max temp: $maxTemp.")
         }
         this.timeSeries!![this.formatter.format(time)] = temp
     }
@@ -112,8 +129,11 @@ class HeatingStatsTracker(
             startTemp = this.startTemp!!,
             targetTemp = this.targetTemp!!,
             endTemp = this.endTemp!!,
-            timeSeriesTimestamps = this.timeSeries!!.map { it.key }.toString(),
-            timeSeriesTemps = this.timeSeries!!.map { it.value }.toString()
+            minTemp = this.minTemp!!,
+            maxTemp = this.maxTemp!!,
+            timeSeriesSamplingPeriodSeconds = this.currentTempSamplingPeriodSeconds,
+            timeSeriesTimestamps = this.timeSeries!!.map { it.key }.joinToString(),
+            timeSeriesTemps = this.timeSeries!!.map { it.value }.joinToString()
         )
     }
 }
