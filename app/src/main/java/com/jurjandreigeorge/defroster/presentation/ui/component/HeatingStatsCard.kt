@@ -5,10 +5,12 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,7 +46,7 @@ fun HeatingStatsCard(
     onCheckboxValueChange: (Boolean) -> Unit,
     onExpandArrowClick: () -> Unit,
     isSelected: Boolean,
-    isExpanded: Boolean
+    isExpanded: Boolean,
 ) {
     val arrowRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
@@ -81,7 +84,10 @@ fun HeatingStatsCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier.fillMaxWidth().weight(1f).clickable(
+                    role = Role.Button,
+                    onClick = onExpandArrowClick
+                ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
@@ -121,17 +127,26 @@ fun HeatingStatsCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                HeatingTempStats(
-                    startTemp = heatingStats.startTemp,
-                    endTemp = heatingStats.endTemp,
-                    minTemp = heatingStats.minTemp,
-                    targetTemp = heatingStats.targetTemp,
-                    maxTemp = heatingStats.maxTemp,
-                    textColor = textColor
-                )
-                HeatingTimeSeriesChart(
-                    heatingStats = heatingStats
-                )
+                if (heatingStats.isTempTracked) {
+                    HeatingTempStats(
+                        startTemp = heatingStats.startTemp,
+                        endTemp = heatingStats.endTemp,
+                        minTemp = heatingStats.minTemp,
+                        targetTemp = heatingStats.targetTemp,
+                        maxTemp = heatingStats.maxTemp,
+                        textColor = textColor
+                    )
+                    HeatingTimeSeriesChart(
+                        heatingStats = heatingStats
+                    )
+                } else {
+                    Text(
+                        text = "Temperature tracking not enabled for this defrost.",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
                 HeatingTimeStats(
                     startTime = heatingStats.startTime,
                     endTime = heatingStats.endTime,

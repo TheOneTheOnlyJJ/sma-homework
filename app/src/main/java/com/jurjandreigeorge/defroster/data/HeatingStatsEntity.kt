@@ -10,6 +10,9 @@ data class HeatingStatsEntity(
     @ColumnInfo(name = "id")
     val id: Long = 0,
 
+    @ColumnInfo(name = "is_temp_tracked")
+    val isTempTracked: Boolean,
+
     @ColumnInfo(name = "start_time")
     val startTime: String,
 

@@ -24,6 +24,7 @@ import com.jurjandreigeorge.defroster.domain.welcomeTexts
 import com.jurjandreigeorge.defroster.presentation.theme.coldColor
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.hotColor
+import com.jurjandreigeorge.defroster.presentation.ui.component.MissingTempSensorCard
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
 
 @Composable
@@ -96,6 +97,10 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 Text(text = "Activity", fontSize = 25.sp)
+            }
+            if (!defrosterViewModel.hasAmbientTempSensor) {
+                Spacer(modifier = Modifier.height(16.dp))
+                MissingTempSensorCard()
             }
         }
     }

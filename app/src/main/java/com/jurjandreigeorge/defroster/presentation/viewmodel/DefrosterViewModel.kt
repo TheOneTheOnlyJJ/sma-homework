@@ -25,6 +25,7 @@ import javax.inject.Inject
 class DefrosterViewModel @Inject constructor(
     private val heatingStatsDao: HeatingStatsDao
 ) : ViewModel() {
+    var hasAmbientTempSensor by mutableStateOf(false)
     var currentTemp by mutableFloatStateOf(0f)
     var targetTemp by mutableIntStateOf(10)
     private val targetTempTolerance = 2
@@ -119,7 +120,10 @@ class DefrosterViewModel @Inject constructor(
         )
         this.heatingState = HeatingState.STARTING_HEATING
         CoroutineScope(Dispatchers.Default).launch {
-            this@DefrosterViewModel.heatingStatsTracker.startTracking(this@DefrosterViewModel.targetTemp)
+            this@DefrosterViewModel.heatingStatsTracker.startTracking(
+                targetTemp = this@DefrosterViewModel.targetTemp,
+                isTempTracked = this@DefrosterViewModel.hasAmbientTempSensor
+            )
             val availableProcessors = Runtime.getRuntime().availableProcessors()
             Log.i("Defroster", "Device has $availableProcessors available processors.")
             for (i in 1..availableProcessors) {

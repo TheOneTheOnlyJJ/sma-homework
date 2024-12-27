@@ -20,6 +20,7 @@ class HeatingStatsTracker(
     private var minTemp: Float? = null
     private var maxTemp: Float? = null
     private var timeSeries: MutableMap<String, Float>? = null
+    private var isTempTracked: Boolean = false
     private val formatter = SimpleDateFormat(dateTimePattern, java.util.Locale.US)
     // Time series manipulation
     private val currentTempSamplingPeriodMs = this.currentTempSamplingPeriodSeconds * 1000
@@ -51,8 +52,8 @@ class HeatingStatsTracker(
                 && this.maxTemp == null
     }
 
-    fun startTracking(targetTemp: Int) {
-        Log.i("Heating Tracker", "Starting tracking heating.")
+    fun startTracking(targetTemp: Int, isTempTracked: Boolean) {
+        Log.i("Heating Tracker", "Starting tracking heating. Temperature tracking enabled: $isTempTracked.")
         if (!this.hasClearedHeatingStats()) {
             throw RuntimeException("Cannot start tracking before clearing previous heating stats!")
         }
@@ -62,14 +63,18 @@ class HeatingStatsTracker(
         this.minTemp = this.startTemp!!
         this.maxTemp = this.startTemp!!
         this.timeSeries = mutableMapOf()
-        this.addToTimeSeriesTimer = Timer()
-        this.addToTimeSeriesTimer!!.schedule(
-            timerTask {
-                addToTimeSeries(Date.from(Instant.now()), getCurrentTemp())
-            },
-            0,
-            this.currentTempSamplingPeriodMs
-        )
+        this.isTempTracked = isTempTracked
+        if (this.isTempTracked) {
+            Log.i("Heating Tracker", "Starting time series timer.")
+            this.addToTimeSeriesTimer = Timer()
+            this.addToTimeSeriesTimer!!.schedule(
+                timerTask {
+                    addToTimeSeries(Date.from(Instant.now()), getCurrentTemp())
+                },
+                0,
+                this.currentTempSamplingPeriodMs
+            )
+        }
         Log.i("Heating Tracker", "Started tracking heating.")
     }
 
@@ -78,10 +83,13 @@ class HeatingStatsTracker(
         if (!this.hasStartedTracking()) {
             throw RuntimeException("Cannot stop tracking heating while tracking not started!")
         }
-        // Clear time series timer
-        this.addToTimeSeriesTimer!!.cancel()
-        this.addToTimeSeriesTimer!!.purge()
-        this.addToTimeSeriesTimer = null
+        if (this.isTempTracked) {
+            Log.i("Heating Tracker", "Stopping time series timer.")
+            // Clear time series timer
+            this.addToTimeSeriesTimer!!.cancel()
+            this.addToTimeSeriesTimer!!.purge()
+            this.addToTimeSeriesTimer = null
+        }
         // Add end time to series
         this.endTime = Date.from(Instant.now())
         this.endTemp = this.getCurrentTemp()
@@ -133,7 +141,8 @@ class HeatingStatsTracker(
             maxTemp = this.maxTemp!!,
             timeSeriesSamplingPeriodSeconds = this.currentTempSamplingPeriodSeconds,
             timeSeriesTimestamps = this.timeSeries!!.map { it.key }.joinToString(),
-            timeSeriesTemps = this.timeSeries!!.map { it.value }.joinToString()
+            timeSeriesTemps = this.timeSeries!!.map { it.value }.joinToString(),
+            isTempTracked = this.isTempTracked
         )
     }
 }

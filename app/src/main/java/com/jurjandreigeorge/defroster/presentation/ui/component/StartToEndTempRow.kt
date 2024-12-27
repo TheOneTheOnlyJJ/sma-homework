@@ -64,7 +64,7 @@ fun StartToEndTempRow(
         Icon(
             imageVector = Icons.Rounded.DoubleArrow,
             contentDescription = "Start to end temperature arrow",
-            modifier = Modifier.padding(horizontal = 6.dp).size(45.dp),
+            modifier = Modifier.padding(horizontal = 4.dp).size(48.dp),
             tint = textColor
         )
         Column(

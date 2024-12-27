@@ -82,8 +82,10 @@ fun DefrosterApp() {
             SensorManager.SENSOR_DELAY_NORMAL
         )
         Log.i("Defroster", "Registered ambient temperature sensor listener.")
+        defrosterViewModel.hasAmbientTempSensor = true
     } else {
         Log.i("Defroster", "Null ambient temperature sensor.")
+        defrosterViewModel.hasAmbientTempSensor = false
     }
 
     ProvideVicoTheme(rememberM3VicoTheme()) {

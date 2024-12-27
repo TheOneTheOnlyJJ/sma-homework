@@ -19,6 +19,7 @@ import com.jurjandreigeorge.defroster.domain.HeatingState
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.getDisabledTempColor
 import com.jurjandreigeorge.defroster.presentation.theme.getTempColor
+import com.jurjandreigeorge.defroster.presentation.ui.component.MissingTempSensorCard
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
 import kotlin.math.roundToInt
 
@@ -77,7 +78,7 @@ fun DefrostScreen(
         }
     }
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(canScroll = { false })
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -114,70 +115,77 @@ fun DefrostScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.align(Alignment.Center)
             ) {
-                Text(
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                    text = "Current Temp.",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = 35.sp,
-                    color = currentTempColor
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                    text = "${"%.2f".format(defrosterViewModel.currentTemp)} °C",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = 55.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = currentTempColor
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    thickness = 3.dp
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                    text = "Target Temp.",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = 35.sp,
-                    color = targetTempColor
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                    text = "${defrosterViewModel.targetTemp} °C",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontSize = 55.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = targetTempColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Slider(
-                    value = targetTempSliderValue,
-                    onValueChange = {
-                        val itInt = it.roundToInt()
-                        targetTempSliderValue = itInt.toFloat()
-                        defrosterViewModel.targetTemp = itInt
-                    },
-                    valueRange = 10f..90f,
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    enabled = defrosterViewModel.heatingState == HeatingState.NOT_HEATING,
-                    colors = SliderDefaults.colors(
-                        thumbColor = targetTempColor,
-                        activeTrackColor = targetTempColor,
-                        disabledThumbColor = targetTempDisabledColor,
-                        disabledActiveTrackColor = targetTempDisabledColor
+                if (defrosterViewModel.hasAmbientTempSensor) {
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = "Current Temp.",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 35.sp,
+                        color = currentTempColor
                     )
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-                    text = hintTextText,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = targetTempColor
-                )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = "${"%.2f".format(defrosterViewModel.currentTemp)} °C",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 55.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = currentTempColor
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(0.8f),
+                        thickness = 3.dp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = "Target Temp.",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 35.sp,
+                        color = targetTempColor
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = "${defrosterViewModel.targetTemp} °C",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontSize = 55.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = targetTempColor
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Slider(
+                        value = targetTempSliderValue,
+                        onValueChange = {
+                            val itInt = it.roundToInt()
+                            targetTempSliderValue = itInt.toFloat()
+                            defrosterViewModel.targetTemp = itInt
+                        },
+                        valueRange = 10f..90f,
+                        modifier = Modifier.fillMaxWidth(0.8f),
+                        enabled = defrosterViewModel.heatingState == HeatingState.NOT_HEATING,
+                        colors = SliderDefaults.colors(
+                            thumbColor = targetTempColor,
+                            activeTrackColor = targetTempColor,
+                            disabledThumbColor = targetTempDisabledColor,
+                            disabledActiveTrackColor = targetTempDisabledColor
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
+                        text = hintTextText,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = targetTempColor
+                    )
+                } else {
+                    MissingTempSensorCard(
+                        bodyText = "You can start and stop defrosting, but without temperature control.\n" +
+                                "Periodically check your device temperature to avoid overheating."
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
