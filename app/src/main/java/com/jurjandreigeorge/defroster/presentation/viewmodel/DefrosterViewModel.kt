@@ -33,7 +33,7 @@ class DefrosterViewModel @Inject constructor(
     var heatingState by mutableStateOf(HeatingState.NOT_HEATING)
         private set
     private val heatingThreadIterationCycleLoopCount = 100_000_000
-    private val heatingThreadSleepTimeMs = 500L
+    private val heatingThreadSleepTimeMs = 5_000L
     private val heatingThreads = mutableStateListOf<Thread>()
 
     private val heatingStatsTrackerCurrentTempSamplingPeriodSeconds = 5L
