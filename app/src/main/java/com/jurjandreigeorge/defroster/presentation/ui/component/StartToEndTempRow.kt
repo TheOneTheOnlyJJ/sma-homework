@@ -60,7 +60,7 @@ fun StartToEndTempRow(
         }
         Icon(
             imageVector = Icons.Rounded.DoubleArrow,
-            contentDescription = "Start to end temperature arrow icon",
+            contentDescription = "Start to end temperature arrow",
             modifier = Modifier.padding(horizontal = 6.dp).size(45.dp),
             tint = textColor
         )

@@ -16,6 +16,8 @@ import com.jurjandreigeorge.defroster.presentation.ui.screen.ActivityScreen
 import com.jurjandreigeorge.defroster.presentation.ui.screen.DefrostScreen
 import com.jurjandreigeorge.defroster.presentation.ui.screen.HomeScreen
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
+import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
+import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
 
 @Composable
 fun DefrosterApp() {
@@ -84,15 +86,17 @@ fun DefrosterApp() {
         Log.i("Defroster", "Null ambient temperature sensor.")
     }
 
-    NavHost(navController = navController, startDestination = "home") {
-        composable("home") {
-            HomeScreen(navController, defrosterViewModel)
-        }
-        composable("defrost") {
-            DefrostScreen(navController,defrosterViewModel)
-        }
-        composable("activity") {
-            ActivityScreen(navController, defrosterViewModel)
+    ProvideVicoTheme(rememberM3VicoTheme()) {
+        NavHost(navController = navController, startDestination = "home") {
+            composable("home") {
+                HomeScreen(navController, defrosterViewModel)
+            }
+            composable("defrost") {
+                DefrostScreen(navController, defrosterViewModel)
+            }
+            composable("activity") {
+                ActivityScreen(navController, defrosterViewModel)
+            }
         }
     }
 }

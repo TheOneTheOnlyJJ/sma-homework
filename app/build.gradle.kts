@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.jurjandreigeorge.defroster"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.jurjandreigeorge.defroster"
@@ -67,5 +67,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     ksp(libs.dagger.compiler)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.ycharts)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.core)
 }

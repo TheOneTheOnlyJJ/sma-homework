@@ -32,7 +32,6 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(getBackgroundColorGradient(defrosterViewModel.heatingState))
-            .padding(16.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -73,7 +72,7 @@ fun HomeScreen(
                     navController.navigate("defrost")
                     Log.i("Defroster Navigation", "Navigated to Defrost screen.")
                 },
-                modifier = Modifier.fillMaxWidth(0.9f)
+                modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 Text(text = "Defrost", fontSize = 25.sp)
             }
@@ -84,7 +83,7 @@ fun HomeScreen(
                     navController.navigate("activity")
                     Log.i("Defroster Navigation", "Navigated to Activity screen.")
                 },
-                modifier = Modifier.fillMaxWidth(0.9f)
+                modifier = Modifier.fillMaxWidth(0.8f)
             ) {
                 Text(text = "Activity", fontSize = 25.sp)
             }

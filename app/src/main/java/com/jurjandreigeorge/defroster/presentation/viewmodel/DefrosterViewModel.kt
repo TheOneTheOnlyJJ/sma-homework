@@ -44,8 +44,6 @@ class DefrosterViewModel @Inject constructor(
 
     val allHeatingStatsFlow: Flow<List<HeatingStatsEntity>> = heatingStatsDao.loadAllFlow()
 
-    var isHeatingCardListReversed by mutableStateOf(false)
-
     fun toggleHeating() {
         when (this.heatingState) {
             HeatingState.NOT_HEATING -> {

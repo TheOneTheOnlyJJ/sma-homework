@@ -1,6 +1,5 @@
 [versions]
-agp = "8.7.1"
-composeCharts = "0.1.0"
+agp = "8.7.3"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -15,7 +14,7 @@ ksp = "2.0.0-1.0.24"
 hilt = "2.52"
 hiltAndroid = "2.52"
 hiltNavigationCompose = "1.2.0"
-ycharts = "2.1.0"
+vico = "2.0.0-beta.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,7 +40,9 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended"}
-ycharts = { module = "co.yml:ycharts", version.ref = "ycharts" }
+vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+vico-core = { group = "com.patrykandpatrick.vico", name = "core", version.ref = "vico" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

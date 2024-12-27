@@ -2,35 +2,35 @@ package com.jurjandreigeorge.defroster.presentation.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import co.yml.charts.axis.AxisData
-import co.yml.charts.axis.DataCategoryOptions
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.linechart.LineChart
-import co.yml.charts.ui.linechart.model.GridLines
-import co.yml.charts.ui.linechart.model.IntersectionPoint
-import co.yml.charts.ui.linechart.model.Line
-import co.yml.charts.ui.linechart.model.LineChartData
-import co.yml.charts.ui.linechart.model.LinePlotData
-import co.yml.charts.ui.linechart.model.LineStyle
-import co.yml.charts.ui.linechart.model.LineType
-import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
-import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
-import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import androidx.compose.ui.unit.sp
 import com.jurjandreigeorge.defroster.data.HeatingStatsEntity
-
+import com.jurjandreigeorge.defroster.presentation.theme.getChartColorFill
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import kotlin.math.ceil
+import kotlin.math.floor
 
 @Composable
 fun HeatingTimeSeriesChart(
-    heatingStats: HeatingStatsEntity,
-    textColor: Color,
-    cardContainerColor: Color
+    heatingStats: HeatingStatsEntity
 ) {
     val timeSeriesTemps = remember {
         heatingStats.timeSeriesTemps
@@ -43,105 +43,87 @@ fun HeatingTimeSeriesChart(
             .map { it.trim() }
     }
 
-    val dataPoints: List<Point> = remember {
-        timeSeriesTemps.mapIndexed { index, temp ->
-            Point(index.toFloat(), temp)
+    val minYRange = remember { floor(heatingStats.minTemp).toDouble() }
+    val maxYRange = remember { ceil(heatingStats.maxTemp).toDouble() }
+    val rangeProvider = remember { CartesianLayerRangeProvider.fixed(
+        minX = 0.toDouble(),
+        maxX = (timeSeriesTimestamps.size - 1).toDouble(),
+        minY = minYRange,
+        maxY = maxYRange
+    ) }
+
+    val modelProducer = remember { CartesianChartModelProducer() }
+
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(y = timeSeriesTemps)
+            }
         }
     }
 
-    val xAxisData = AxisData.Builder()
-        .steps(dataPoints.size - 1)
-        .axisStepSize(50.dp)
-        .backgroundColor(cardContainerColor)
-        .labelData { i ->
-            val currentPointSecondsElapsed = i * heatingStats.timeSeriesSamplingPeriodSeconds
-            val hours = currentPointSecondsElapsed / 3600
-            val minutes = (currentPointSecondsElapsed % 3600) / 60
-            val seconds = currentPointSecondsElapsed % 60
-
-            val formattedDuration = buildString {
-                append("+")
-                if (hours > 0) append("${hours}h")
-                if (minutes > 0) append("${minutes}m")
-                if (seconds > 0 || (seconds == 0L && minutes == 0L && hours == 0L)) append("${seconds}s")
-            }
-            formattedDuration
-        }
-        .axisLabelAngle(17.5f)
-        .labelAndAxisLinePadding(8.dp)
-        .axisLineColor(textColor)
-        .axisLabelColor(textColor)
-        .setDataCategoryOptions(
-            DataCategoryOptions(
-                isDataCategoryInYAxis = false,
-                isDataCategoryStartFromBottom = true
-            )
-        )
-        .build()
-
-    val yAxisSteps = 10
-    val yAxisData = AxisData.Builder()
-        .steps(yAxisSteps)
-        .backgroundColor(cardContainerColor)
-        .labelData { i ->
-            val yScale = (heatingStats.maxTemp - heatingStats.minTemp) / yAxisSteps
-            "%.2f".format((i * yScale) + heatingStats.minTemp)
-        }
-        .axisLineColor(textColor)
-        .axisLabelColor(textColor)
-        .build()
-
-    val lineChartData = LineChartData(
-        linePlotData = LinePlotData(
-            lines = listOf(
-                Line(
-                    dataPoints = dataPoints,
-                    lineStyle = LineStyle(
-                        color = textColor,
-                        lineType = LineType.SmoothCurve(isDotted = false)
-                    ),
-                    shadowUnderLine = ShadowUnderLine(
-                        alpha = 0.5f,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.inversePrimary,
-                                Color.Transparent
+    CartesianChartHost(
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider = LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(
+                            getChartColorFill(
+                                minY = minYRange,
+                                maxY = maxYRange
+                            )
+                        ),
+                        areaFill = LineCartesianLayer.AreaFill.single(
+                            getChartColorFill(
+                                minY = minYRange,
+                                maxY = maxYRange,
+                                alpha = 0.25f
                             )
                         )
-                    ),
-                    intersectionPoint = IntersectionPoint(
-                        color = textColor,
-                    ),
-                    selectionHighlightPoint = SelectionHighlightPoint(
-                        color = MaterialTheme.colorScheme.primary,
-                        radius = 8.dp
-                    ),
-                    selectionHighlightPopUp = SelectionHighlightPopUp(
-                        backgroundColor = MaterialTheme.colorScheme.inverseSurface,
-                        labelColor = MaterialTheme.colorScheme.inverseOnSurface,
-                        popUpLabel = { x, y ->
-                            "${timeSeriesTimestamps[x.toInt()]}: ${"%.2f".format(y)} °C"
-                        }
                     )
+                ),
+                rangeProvider = rangeProvider
+            ),
+            startAxis = VerticalAxis.rememberStart(
+                title = "Temperature (°C)",
+                titleComponent = rememberAxisLabelComponent(
+                    textSize = 16.sp
+                ),
+                label = rememberAxisLabelComponent(
+                    textSize = 16.sp
                 )
-            )
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                title = "Time since start",
+                titleComponent = rememberAxisLabelComponent(
+                    textSize = 16.sp
+                ),
+                label = rememberAxisLabelComponent(
+                    textSize = 16.sp
+                ),
+                valueFormatter = { _, value, _ ->
+                    val currentPointSecondsElapsed = value.toInt() * heatingStats.timeSeriesSamplingPeriodSeconds
+                    val hours = currentPointSecondsElapsed / 3600
+                    val minutes = (currentPointSecondsElapsed % 3600) / 60
+                    val seconds = currentPointSecondsElapsed % 60
+                    buildString {
+                        append("+")
+                        if (hours > 0) append("${hours}h")
+                        if (minutes > 0) append("${minutes}m")
+                        if (seconds > 0 || (seconds == 0L && minutes == 0L && hours == 0L)) append("${seconds}s")
+                    }
+                }
+            ),
+            marker = rememberHeatingTimeSeriesChartMarker(
+                valueFormatter = { _, targets ->
+                    val currentIdx = targets.first().x.toInt()
+                    "${timeSeriesTimestamps[currentIdx]}: ${"%.2f".format(timeSeriesTemps[currentIdx])} °C"
+                }
+            ),
         ),
-        backgroundColor = cardContainerColor,
-        containerPaddingEnd = 100.dp,
-        paddingTop = 35.dp,
-        paddingRight = 0.dp,
-        bottomPadding = 16.dp,
-        xAxisData = xAxisData,
-        yAxisData = yAxisData,
-        gridLines = GridLines(
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
-    )
-
-    LineChart(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        lineChartData = lineChartData
+        modelProducer = modelProducer,
+        scrollState = rememberVicoScrollState(),
+        zoomState = rememberVicoZoomState(),
+        modifier = Modifier.fillMaxWidth().height(350.dp)
     )
 }

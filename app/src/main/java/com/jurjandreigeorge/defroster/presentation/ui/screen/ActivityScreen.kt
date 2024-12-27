@@ -8,7 +8,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material.icons.rounded.UnfoldLess
+import androidx.compose.material.icons.rounded.UnfoldMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -45,9 +46,10 @@ fun ActivityScreen(
     navController: NavController,
     defrosterViewModel: DefrosterViewModel
 ) {
-    val nonDeletedHeatingStats by defrosterViewModel.allHeatingStatsFlow.collectAsStateWithLifecycle(
+    val currentHeatingStats by defrosterViewModel.allHeatingStatsFlow.collectAsStateWithLifecycle(
         initialValue = emptyList()
     )
+    val expandedHeatingStatsIds = remember { mutableStateListOf<Long>() }
     val selectedHeatingStatsIds = remember { mutableStateListOf<Long>() }
 
     var isDeleteHeatingStatsDialogOpen by remember { mutableStateOf(false) }
@@ -81,7 +83,9 @@ fun ActivityScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         Log.i("Defroster Activity Screen", "Delete items dialog Confirm button clicked.")
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         defrosterViewModel.deleteHeatingStats(selectedHeatingStatsIds.toList())
+                        expandedHeatingStatsIds.removeAll(selectedHeatingStatsIds)
                         selectedHeatingStatsIds.clear()
                         isDeleteHeatingStatsDialogOpen = false
                     }) {
@@ -134,19 +138,29 @@ fun ActivityScreen(
                             )
                         }
                     }
-                    if (nonDeletedHeatingStats.size >= 2) {
+                    if (expandedHeatingStatsIds.isNotEmpty()) {
                         IconButton(onClick = {
-                            if (defrosterViewModel.isHeatingCardListReversed) {
-                                Log.i("Defroster", "Un-reversing heating stats list.")
-                                defrosterViewModel.isHeatingCardListReversed = false
-                            } else {
-                                Log.i("Defroster", "Reversing heating stats list.")
-                                defrosterViewModel.isHeatingCardListReversed = true
+                            Log.i("Defroster Activity Screen", "Collapse all heating stats cards icon button clicked.")
+                            expandedHeatingStatsIds.clear()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Rounded.UnfoldLess,
+                                contentDescription = "Collapse all heating stats cards"
+                            )
+                        }
+                    }
+                    if (expandedHeatingStatsIds.size < currentHeatingStats.size) {
+                        IconButton(onClick = {
+                            Log.i("Defroster Activity Screen", "Expand all heating stats cards icon button clicked.")
+                            for (heatingStats in currentHeatingStats) {
+                                if (!expandedHeatingStatsIds.contains(heatingStats.id)) {
+                                    expandedHeatingStatsIds.add(heatingStats.id)
+                                }
                             }
                         }) {
                             Icon(
-                                imageVector = Icons.Rounded.SwapVert,
-                                contentDescription = "Reverse heating stats list"
+                                imageVector = Icons.Rounded.UnfoldMore,
+                                contentDescription = "Expand all heating stats cards"
                             )
                         }
                     }
@@ -161,7 +175,7 @@ fun ActivityScreen(
                 .background(getBackgroundColorGradient(defrosterViewModel.heatingState))
                 .padding(innerPadding)
         ) {
-            if (nonDeletedHeatingStats.isEmpty()) {
+            if (currentHeatingStats.isEmpty()) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.fillMaxSize()
@@ -176,31 +190,39 @@ fun ActivityScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
                     state = scrollState
                 ) {
-                    items(nonDeletedHeatingStats.size) { index ->
-                        val currentHeatingStats = if (defrosterViewModel.isHeatingCardListReversed)
-                            nonDeletedHeatingStats.reversed()[index]
-                        else
-                            nonDeletedHeatingStats[index]
+                    items(currentHeatingStats.size) { index ->
+                        val heatingStats = currentHeatingStats[index]
                         HeatingStatsCard(
-                            heatingStats = currentHeatingStats,
-                            title = "Defrost #${currentHeatingStats.id}",
-                            onLongClick = {
+                            heatingStats = heatingStats,
+                            title = "Defrost #${heatingStats.id}",
+                            onCheckboxValueChange = { checked ->
                                 scope.launch {
-                                    Log.i("Defroster Activity Screen", "Long click detected on heating stats ${currentHeatingStats.id} card.")
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (selectedHeatingStatsIds.contains(currentHeatingStats.id)) {
-                                        Log.i("Defroster Activity Screen", "Deselecting heating stats ${currentHeatingStats.id} card.")
-                                        selectedHeatingStatsIds.remove(currentHeatingStats.id)
+                                    Log.i("Defroster Activity Screen", "Checkbox value changed to $checked for heating stats ${heatingStats.id} card.")
+                                    if (checked) {
+                                        Log.i("Defroster Activity Screen", "Selecting heating stats ${heatingStats.id} card.")
+                                        selectedHeatingStatsIds.add(heatingStats.id)
                                     } else {
-                                        Log.i("Defroster Activity Screen", "Selecting heating stats ${currentHeatingStats.id} card.")
-                                        selectedHeatingStatsIds.add(currentHeatingStats.id)
+                                        Log.i("Defroster Activity Screen", "Deselecting heating stats ${heatingStats.id} card.")
+                                        selectedHeatingStatsIds.remove(heatingStats.id)
                                     }
                                 }
                             },
-                            isSelected = selectedHeatingStatsIds.contains(currentHeatingStats.id)
+                            onExpandArrowClick = {
+                                scope.launch {
+                                    Log.i("Defroster Activity Screen", "Expand arrow clicked for heating stats ${heatingStats.id} card.")
+                                    if (expandedHeatingStatsIds.contains(heatingStats.id)) {
+                                        Log.i("Defroster Activity Screen", "Removing heating stats ${heatingStats.id} from expanded list.")
+                                        expandedHeatingStatsIds.remove(heatingStats.id)
+                                    } else {
+                                        Log.i("Defroster Activity Screen", "Adding heating stats ${heatingStats.id} to expanded list.")
+                                        expandedHeatingStatsIds.add(heatingStats.id)
+                                    }
+                                }
+                            },
+                            isSelected = selectedHeatingStatsIds.contains(heatingStats.id),
+                            isExpanded = expandedHeatingStatsIds.contains(heatingStats.id)
                         )
                     }
                 }

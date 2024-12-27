@@ -127,7 +127,7 @@ fun DefrostScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(0.85f),
+                    modifier = Modifier.fillMaxWidth(0.8f),
                     thickness = 3.dp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -154,7 +154,7 @@ fun DefrostScreen(
                         defrosterViewModel.targetTemp = itInt
                     },
                     valueRange = 10f..90f,
-                    modifier = Modifier.fillMaxWidth(0.9f),
+                    modifier = Modifier.fillMaxWidth(0.8f),
                     enabled = defrosterViewModel.heatingState != HeatingState.HEATING,
                     colors = SliderDefaults.colors(
                         thumbColor = targetTempColor,
@@ -177,7 +177,7 @@ fun DefrostScreen(
                     },
                     enabled = isToggleHeatingButtonEnabled,
                     modifier = Modifier
-                        .fillMaxWidth(0.9f)
+                        .fillMaxWidth(0.8f)
                         .padding(vertical = 8.dp)
                 ) {
                     Text(text = toggleHeatingButtonText, fontSize = 25.sp)

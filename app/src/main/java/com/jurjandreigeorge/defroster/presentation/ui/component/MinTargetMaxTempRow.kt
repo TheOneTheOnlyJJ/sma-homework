@@ -44,14 +44,13 @@ fun MinTargetMaxTempRow(
             Text(
                 text = "Min.",
                 style = MaterialTheme.typography.bodyLarge,
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 color = textColor
             )
-//            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "${"%.2f".format(minTemp)} °C",
                 style = MaterialTheme.typography.headlineMedium,
-                fontSize = 23.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Medium,
                 color = minTempColor
             )
@@ -61,21 +60,20 @@ fun MinTargetMaxTempRow(
             thickness = 2.dp
         )
         Column(
-            modifier = Modifier.fillMaxWidth().weight(1.5f),
+            modifier = Modifier.fillMaxWidth().weight(1.4f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Target",
                 style = MaterialTheme.typography.bodyLarge,
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 color = textColor
             )
-//            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "$targetTemp °C",
                 style = MaterialTheme.typography.headlineMedium,
-                fontSize = 23.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Medium,
                 color = targetTempColor
             )
@@ -92,14 +90,13 @@ fun MinTargetMaxTempRow(
             Text(
                 text = "Max.",
                 style = MaterialTheme.typography.bodyLarge,
-                fontSize = 18.sp,
+                fontSize = 20.sp,
                 color = textColor
             )
-//            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "${"%.2f".format(maxTemp)} °C",
                 style = MaterialTheme.typography.headlineMedium,
-                fontSize = 23.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Medium,
                 color = maxTempColor
             )
