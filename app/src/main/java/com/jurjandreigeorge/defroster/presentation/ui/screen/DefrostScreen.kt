@@ -2,6 +2,7 @@ package com.jurjandreigeorge.defroster.presentation.ui.screen
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,18 +59,20 @@ fun DefrostScreen(
     val isToggleHeatingButtonEnabled by remember {
         derivedStateOf {
             when (defrosterViewModel.heatingState) {
+                HeatingState.NOT_HEATING -> defrosterViewModel.targetTemp > defrosterViewModel.currentTemp
+                HeatingState.STARTING_HEATING -> false
                 HeatingState.HEATING -> true
                 HeatingState.STOPPING_HEATING -> false
-                HeatingState.NOT_HEATING -> defrosterViewModel.targetTemp > defrosterViewModel.currentTemp
             }
         }
     }
     val toggleHeatingButtonText by remember {
         derivedStateOf {
             when (defrosterViewModel.heatingState) {
+                HeatingState.NOT_HEATING -> "Start"
+                HeatingState.STARTING_HEATING -> "Starting"
                 HeatingState.HEATING -> "Stop"
                 HeatingState.STOPPING_HEATING -> "Stopping"
-                HeatingState.NOT_HEATING -> "Start"
             }
         }
     }
@@ -112,6 +115,7 @@ fun DefrostScreen(
                 modifier = Modifier.align(Alignment.Center)
             ) {
                 Text(
+                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                     text = "Current Temp.",
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 35.sp,
@@ -119,6 +123,7 @@ fun DefrostScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                     text = "${"%.2f".format(defrosterViewModel.currentTemp)} °C",
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 55.sp,
@@ -132,6 +137,7 @@ fun DefrostScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                     text = "Target Temp.",
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 35.sp,
@@ -139,6 +145,7 @@ fun DefrostScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                     text = "${defrosterViewModel.targetTemp} °C",
                     style = MaterialTheme.typography.headlineMedium,
                     fontSize = 55.sp,
@@ -155,7 +162,7 @@ fun DefrostScreen(
                     },
                     valueRange = 10f..90f,
                     modifier = Modifier.fillMaxWidth(0.8f),
-                    enabled = defrosterViewModel.heatingState != HeatingState.HEATING,
+                    enabled = defrosterViewModel.heatingState == HeatingState.NOT_HEATING,
                     colors = SliderDefaults.colors(
                         thumbColor = targetTempColor,
                         activeTrackColor = targetTempColor,
@@ -165,6 +172,7 @@ fun DefrostScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
+                    modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                     text = hintTextText,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.SemiBold,

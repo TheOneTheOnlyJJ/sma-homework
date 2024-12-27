@@ -3,11 +3,13 @@ package com.jurjandreigeorge.defroster.presentation.ui.screen
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -18,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.jurjandreigeorge.defroster.domain.welcomeTexts
 import com.jurjandreigeorge.defroster.presentation.theme.coldColor
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.hotColor
@@ -28,6 +31,8 @@ fun HomeScreen(
     navController: NavController,
     defrosterViewModel: DefrosterViewModel
 ) {
+    val welcomeText = remember { welcomeTexts.random() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -38,6 +43,7 @@ fun HomeScreen(
             modifier = Modifier.align(Alignment.Center)
         ) {
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "Defroster",
                 textAlign = TextAlign.Center,
                 style = TextStyle(
@@ -59,9 +65,13 @@ fun HomeScreen(
                     .aspectRatio(1f)
             )
             Text(
-                text = "When snow can’t melt fast enough",
+                modifier = Modifier.basicMarquee(
+                    iterations = Int.MAX_VALUE,
+                    velocity = 60.dp
+                ),
+                text = welcomeText,
                 style = MaterialTheme.typography.bodyMedium,
-                fontSize = 22.sp,
+                fontSize = 25.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
             )

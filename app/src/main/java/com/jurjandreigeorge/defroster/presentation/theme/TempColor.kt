@@ -44,6 +44,7 @@ fun getDisabledTempColor(tempColor: Color, heatingState: HeatingState): Color {
 }
 
 val backgroundColors = mapOf(
+    HeatingState.STARTING_HEATING to Color(0xFFA2F2F0),
     HeatingState.HEATING to Color(0xFFFFB3B3),
     HeatingState.STOPPING_HEATING to Color(0xFFFFB3B3),
     HeatingState.NOT_HEATING to Color(0xFFA2F2F0)

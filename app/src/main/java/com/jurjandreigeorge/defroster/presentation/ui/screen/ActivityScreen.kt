@@ -2,6 +2,7 @@ package com.jurjandreigeorge.defroster.presentation.ui.screen
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -181,6 +182,7 @@ fun ActivityScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
+                        modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                         text = "No activity to show",
                         style = MaterialTheme.typography.headlineMedium
                     )

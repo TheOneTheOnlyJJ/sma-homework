@@ -53,7 +53,9 @@ class DefrosterViewModel @Inject constructor(
                 this.stopHeating()
             }
             else -> {
-                throw RuntimeException("Should not toggle heating while stopping heating!")
+                throw RuntimeException(
+                    "Should not be possible to toggle heating while heating state is ${this.heatingState}!"
+                )
             }
         }
     }
@@ -65,7 +67,7 @@ class DefrosterViewModel @Inject constructor(
         }
     }
 
-    private fun heatingThreadImplementation(logTag: String) {
+    private fun heatingThreadImpl(logTag: String) {
         var heatingCycle = BigInteger.ZERO
         var doRunHeating: Boolean
         var isInActiveHeatingMode = true
@@ -115,37 +117,46 @@ class DefrosterViewModel @Inject constructor(
             "Defroster",
             "Starting heating with target temperature of ${this.targetTemp} °C."
         )
-        this.heatingState = HeatingState.HEATING
-        this.heatingStatsTracker.startTracking(this.targetTemp)
-        val availableProcessors = Runtime.getRuntime().availableProcessors()
-        Log.i("Defroster", "Device has $availableProcessors available processors.")
-        for (i in 1..availableProcessors) {
-            val newHeatingThread = Thread {
-                this.heatingThreadImplementation("Defroster Heating Thread No. $i")
+        this.heatingState = HeatingState.STARTING_HEATING
+        CoroutineScope(Dispatchers.Default).launch {
+            this@DefrosterViewModel.heatingStatsTracker.startTracking(this@DefrosterViewModel.targetTemp)
+            val availableProcessors = Runtime.getRuntime().availableProcessors()
+            Log.i("Defroster", "Device has $availableProcessors available processors.")
+            for (i in 1..availableProcessors) {
+                val newHeatingThread = Thread {
+                    this@DefrosterViewModel.heatingThreadImpl("Defroster Heating Thread No. $i")
+                }
+                this@DefrosterViewModel.heatingThreads.add(newHeatingThread)
             }
-            this.heatingThreads.add(newHeatingThread)
+            for (i in 0..<this@DefrosterViewModel.heatingThreads.size) {
+                this@DefrosterViewModel.heatingThreads[i].start()
+            }
+            Log.i("Defroster", "All heating threads started.")
+            this@DefrosterViewModel.heatingState = HeatingState.HEATING
         }
-        for (i in 0..<this.heatingThreads.size) {
-            this.heatingThreads[i].start()
-        }
+
     }
 
     private fun stopHeating() {
         Log.i("Defroster", "Stopping heating.")
         this.heatingState = HeatingState.STOPPING_HEATING
-        for (thread in this.heatingThreads) {
-            thread.interrupt()
-        }
-        for (thread in this.heatingThreads) {
-            thread.join()
-        }
-        this.heatingThreads.clear()
-        Log.i("Defroster", "All heating threads stopped.")
-        val heatingStats = this.heatingStatsTracker.stopTracking()
-        Log.i("Defroster", "Heating stats: ${heatingStats}.")
-        this.heatingState = HeatingState.NOT_HEATING
-        CoroutineScope(Dispatchers.IO).launch {
-            insertHeatingStatsIntoRoom(heatingStats = listOf(heatingStats))
+        CoroutineScope(Dispatchers.Default).launch {
+            Log.i("Defroster", "Interrupting all heating threads.")
+            for (thread in this@DefrosterViewModel.heatingThreads) {
+                thread.interrupt()
+            }
+            Log.i("Defroster", "Joining all heating threads.")
+            for (thread in this@DefrosterViewModel.heatingThreads) {
+                thread.join()
+            }
+            this@DefrosterViewModel.heatingThreads.clear()
+            Log.i("Defroster", "All heating threads stopped.")
+            val heatingStats = this@DefrosterViewModel.heatingStatsTracker.stopTracking()
+            Log.i("Defroster", "Heating stats: ${heatingStats}.")
+            this@DefrosterViewModel.heatingState = HeatingState.NOT_HEATING
+            CoroutineScope(Dispatchers.IO).launch {
+                insertHeatingStatsIntoRoom(heatingStats = listOf(heatingStats))
+            }
         }
     }
 

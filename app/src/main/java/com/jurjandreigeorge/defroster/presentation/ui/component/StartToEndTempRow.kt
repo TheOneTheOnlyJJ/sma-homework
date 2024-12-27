@@ -1,5 +1,6 @@
 package com.jurjandreigeorge.defroster.presentation.ui.component
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -44,6 +45,7 @@ fun StartToEndTempRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "Start",
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 20.sp,
@@ -51,6 +53,7 @@ fun StartToEndTempRow(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "${"%.2f".format(startTemp)} °C",
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 30.sp,
@@ -70,6 +73,7 @@ fun StartToEndTempRow(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "End",
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 20.sp,
@@ -77,6 +81,7 @@ fun StartToEndTempRow(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "${"%.2f".format(endTemp)} °C",
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 30.sp,

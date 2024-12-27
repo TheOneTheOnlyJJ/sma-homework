@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -85,7 +86,9 @@ fun HeatingStatsCard(
                 horizontalArrangement = Arrangement.Start
             ) {
                 Text(
-                    modifier = Modifier.padding(start = 4.dp),
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .basicMarquee(iterations = Int.MAX_VALUE),
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
                     fontSize = 25.sp,

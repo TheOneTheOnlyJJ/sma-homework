@@ -1,5 +1,6 @@
 package com.jurjandreigeorge.defroster.presentation.ui.component
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -42,12 +43,14 @@ fun MinTargetMaxTempRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "Min.",
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 20.sp,
                 color = textColor
             )
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "${"%.2f".format(minTemp)} °C",
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 25.sp,
@@ -65,12 +68,14 @@ fun MinTargetMaxTempRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "Target",
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 20.sp,
                 color = textColor
             )
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "$targetTemp °C",
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 25.sp,
@@ -88,12 +93,14 @@ fun MinTargetMaxTempRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "Max.",
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 20.sp,
                 color = textColor
             )
             Text(
+                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
                 text = "${"%.2f".format(maxTemp)} °C",
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = 25.sp,

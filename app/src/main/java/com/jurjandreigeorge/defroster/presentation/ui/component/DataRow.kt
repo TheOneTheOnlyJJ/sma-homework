@@ -1,5 +1,6 @@
 package com.jurjandreigeorge.defroster.presentation.ui.component
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ fun DataRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
+            modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
             text = "$data:",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = dataFontWeight,
@@ -34,6 +36,7 @@ fun DataRow(
             fontSize = 20.sp
         )
         Text(
+            modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
             text = value,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = valueFontWeight,
