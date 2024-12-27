@@ -33,10 +33,10 @@ class DefrosterViewModel @Inject constructor(
     var heatingState by mutableStateOf(HeatingState.NOT_HEATING)
         private set
     private val heatingThreadIterationCycleLoopCount = 100_000_000
-    private val heatingThreadSleepTime = 500L
+    private val heatingThreadSleepTimeMs = 500L
     private val heatingThreads = mutableStateListOf<Thread>()
 
-    private val heatingStatsTrackerCurrentTempSamplingPeriodSeconds = 1L
+    private val heatingStatsTrackerCurrentTempSamplingPeriodSeconds = 5L
     private val heatingStatsTracker: HeatingStatsTracker = HeatingStatsTracker(
         getCurrentTemp = { this.currentTemp },
         currentTempSamplingPeriodSeconds = this.heatingStatsTrackerCurrentTempSamplingPeriodSeconds
@@ -101,8 +101,8 @@ class DefrosterViewModel @Inject constructor(
                     heatingCycle = heatingCycle.add(BigInteger.ONE)
                     Log.i(logTag, "Completed heating cycle no. $heatingCycle.")
                 } else {
-                    Log.i(logTag, "Going to sleep ${this.heatingThreadSleepTime} ms.")
-                    Thread.sleep(this.heatingThreadSleepTime)
+                    Log.i(logTag, "Going to sleep ${this.heatingThreadSleepTimeMs} ms.")
+                    Thread.sleep(this.heatingThreadSleepTimeMs)
                 }
             }
         } catch (e: InterruptedException) {
