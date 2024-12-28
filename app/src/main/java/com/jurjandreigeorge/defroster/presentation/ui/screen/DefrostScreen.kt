@@ -182,7 +182,7 @@ fun DefrostScreen(
                     )
                 } else {
                     MissingTempSensorCard(
-                        bodyText = "You can start and stop defrosting, but without temperature control.\n" +
+                        bodyText = "You can defrost, but without automatic temperature control.\n" +
                                 "Periodically check your device temperature to avoid overheating."
                     )
                 }

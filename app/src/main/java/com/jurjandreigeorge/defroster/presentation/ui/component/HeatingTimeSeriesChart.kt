@@ -43,8 +43,14 @@ fun HeatingTimeSeriesChart(
             .map { it.trim() }
     }
 
+//    val timeSeriesTemps = listOf(1.0f, 2.0f, 30.0f, -20.0f, 70f)
+//    val timeSeriesTimestamps = listOf("1", "2", "3", "4", "High")
+//    val minYRange = remember { floor(timeSeriesTemps.min()).toDouble() }
+//    val maxYRange = remember { ceil(timeSeriesTemps.max()).toDouble() }
+
     val minYRange = remember { floor(heatingStats.minTemp).toDouble() }
     val maxYRange = remember { ceil(heatingStats.maxTemp).toDouble() }
+
     val rangeProvider = remember { CartesianLayerRangeProvider.fixed(
         minX = 0.toDouble(),
         maxX = (timeSeriesTimestamps.size - 1).toDouble(),

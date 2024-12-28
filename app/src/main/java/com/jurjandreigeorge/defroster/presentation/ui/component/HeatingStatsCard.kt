@@ -98,7 +98,7 @@ fun HeatingStatsCard(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
                     fontSize = 25.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Left,
                     color = textColor
                 )
@@ -141,8 +141,9 @@ fun HeatingStatsCard(
                     )
                 } else {
                     Text(
-                        text = "Temperature tracking not enabled for this defrost.",
+                        text = "Temperature tracking disabled for this defrost.",
                         textAlign = TextAlign.Center,
+                        fontSize = 20.sp,
                         style = MaterialTheme.typography.bodyLarge,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
