@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import com.jurjandreigeorge.defroster.domain.HeatingState
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.core.common.Fill
-import com.patrykandpatrick.vico.core.common.shader.DynamicShader
+import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import kotlin.ranges.coerceIn
 
 val coldColor = Color(0xFF257ca3)
@@ -64,7 +64,6 @@ fun getBackgroundColorGradient(heatingState: HeatingState): Brush {
     )
 }
 
-@Composable
 fun getChartColorFill(minY: Double, maxY: Double, alpha: Float = 1f): Fill {
     var gradientHotColor: Color = getTempColor(maxY)
     var gradientColdColor: Color = getTempColor(minY)
@@ -92,7 +91,7 @@ fun getChartColorFill(minY: Double, maxY: Double, alpha: Float = 1f): Fill {
             }
             colorSteps.add(Pair(gradientColdColor, 1f))
             // Create fill
-            return fill(DynamicShader.verticalGradient(
+            return fill(ShaderProvider.verticalGradient(
                 colors = colorSteps.map { it.first.toArgb() }.toIntArray(),
                 positions = colorSteps.map { it.second }.toFloatArray()
             ))

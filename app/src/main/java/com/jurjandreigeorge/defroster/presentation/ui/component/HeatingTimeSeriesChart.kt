@@ -62,9 +62,7 @@ fun HeatingTimeSeriesChart(
 
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
-            lineSeries {
-                series(y = timeSeriesTemps)
-            }
+            lineSeries { series(y = timeSeriesTemps) }
         }
     }
 
@@ -73,6 +71,7 @@ fun HeatingTimeSeriesChart(
             rememberLineCartesianLayer(
                 lineProvider = LineCartesianLayer.LineProvider.series(
                     LineCartesianLayer.rememberLine(
+                        pointConnector = LineCartesianLayer.PointConnector.cubic(),
                         fill = LineCartesianLayer.LineFill.single(
                             getChartColorFill(
                                 minY = minYRange,
@@ -116,14 +115,18 @@ fun HeatingTimeSeriesChart(
                         append("+")
                         if (hours > 0) append("${hours}h")
                         if (minutes > 0) append("${minutes}m")
-                        if (seconds > 0 || (seconds == 0L && minutes == 0L && hours == 0L)) append("${seconds}s")
+                        if (seconds > 0 || (seconds == 0L && minutes == 0L && hours == 0L)) append(
+                            "${seconds}s"
+                        )
                     }
                 }
             ),
             marker = rememberHeatingTimeSeriesChartMarker(
                 valueFormatter = { _, targets ->
-                    val currentIdx = targets.first().x.toInt()
-                    "${timeSeriesTimestamps[currentIdx]}: ${"%.2f".format(timeSeriesTemps[currentIdx])} °C"
+                    val idx = targets.first().x.toInt()
+                    val timestamp = timeSeriesTimestamps[idx]
+                    val temp = "%.2f °C".format(timeSeriesTemps[idx])
+                    "$timestamp: $temp"
                 }
             ),
         ),

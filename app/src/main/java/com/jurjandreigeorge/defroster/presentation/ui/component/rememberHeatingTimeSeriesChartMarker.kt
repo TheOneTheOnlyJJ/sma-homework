@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 by Patryk Goworowski and Patrick Michalik.
+ * Copyright 2025 by Patryk Goworowski and Patrick Michalik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,95 +21,89 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.common.component.fixed
-import com.patrykandpatrick.vico.compose.common.component.rememberLayeredComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.component.shadow
-import com.patrykandpatrick.vico.compose.common.dimensions
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.compose.common.insets
 import com.patrykandpatrick.vico.compose.common.shape.markerCorneredShape
 import com.patrykandpatrick.vico.core.cartesian.CartesianMeasuringContext
-import com.patrykandpatrick.vico.core.cartesian.HorizontalDimensions
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModel
+import com.patrykandpatrick.vico.core.cartesian.layer.CartesianLayerDimensions
+import com.patrykandpatrick.vico.core.cartesian.layer.CartesianLayerMargins
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarkerValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Fill
-import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.LayeredComponent
 import com.patrykandpatrick.vico.core.common.component.Shadow
 import com.patrykandpatrick.vico.core.common.component.ShapeComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.shape.Corner
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 
 @Composable
 internal fun rememberHeatingTimeSeriesChartMarker(
-    labelPosition: DefaultCartesianMarker.LabelPosition = DefaultCartesianMarker.LabelPosition.Top,
-    valueFormatter: CartesianMarkerValueFormatter,
+    valueFormatter: DefaultCartesianMarker.ValueFormatter =
+        DefaultCartesianMarker.ValueFormatter.default(),
     showIndicator: Boolean = true,
 ): CartesianMarker {
-    val labelBackgroundShape = markerCorneredShape(Corner.FullyRounded)
+    val labelBackgroundShape = markerCorneredShape(CorneredShape.Corner.Rounded)
     val labelBackground =
         rememberShapeComponent(
-            fill = fill(MaterialTheme.colorScheme.surfaceBright),
+            fill = fill(MaterialTheme.colorScheme.surfaceContainer),
             shape = labelBackgroundShape,
             shadow =
-            shadow(radius = LABEL_BACKGROUND_SHADOW_RADIUS_DP.dp, dy = LABEL_BACKGROUND_SHADOW_DY_DP.dp),
+            shadow(radius = LABEL_BACKGROUND_SHADOW_RADIUS_DP.dp, y = LABEL_BACKGROUND_SHADOW_DY_DP.dp),
         )
     val label =
         rememberTextComponent(
             color = MaterialTheme.colorScheme.onSurface,
             textAlignment = Layout.Alignment.ALIGN_CENTER,
-            textSize = 14.sp,
-            padding = dimensions(8.dp, 4.dp),
+            padding = insets(8.dp, 4.dp),
             background = labelBackground,
-            minWidth = TextComponent.MinWidth.fixed(40.dp)
+            minWidth = TextComponent.MinWidth.fixed(40.dp),
         )
     val indicatorFrontComponent =
         rememberShapeComponent(fill(MaterialTheme.colorScheme.surface), CorneredShape.Pill)
     val indicatorCenterComponent = rememberShapeComponent(shape = CorneredShape.Pill)
     val indicatorRearComponent = rememberShapeComponent(shape = CorneredShape.Pill)
     val indicator =
-        rememberLayeredComponent(
-            rear = indicatorRearComponent,
+        LayeredComponent(
+            back = indicatorRearComponent,
             front =
-            rememberLayeredComponent(
-                rear = indicatorCenterComponent,
+            LayeredComponent(
+                back = indicatorCenterComponent,
                 front = indicatorFrontComponent,
-                padding = dimensions(5.dp),
+                padding = insets(5.dp),
             ),
-            padding = dimensions(10.dp),
+            padding = insets(10.dp),
         )
     val guideline = rememberAxisGuidelineComponent()
-    return remember(label, labelPosition, indicator, showIndicator, guideline) {
+    return remember(label, valueFormatter, indicator, showIndicator, guideline) {
         object :
             DefaultCartesianMarker(
                 label = label,
-                labelPosition = labelPosition,
                 valueFormatter = valueFormatter,
                 indicator =
                 if (showIndicator) {
                     { color ->
                         LayeredComponent(
-                            rear =
+                            back =
                             ShapeComponent(Fill(ColorUtils.setAlphaComponent(color, 38)), CorneredShape.Pill),
                             front =
                             LayeredComponent(
-                                rear =
+                                back =
                                 ShapeComponent(
                                     fill = Fill(color),
                                     shape = CorneredShape.Pill,
                                     shadow = Shadow(radiusDp = 12f, color = color),
                                 ),
                                 front = indicatorFrontComponent,
-                                padding = dimensions(5.dp),
+                                padding = insets(5.dp),
                             ),
-                            padding = dimensions(10.dp),
+                            padding = insets(10.dp),
                         )
                     }
                 } else {
@@ -118,24 +112,24 @@ internal fun rememberHeatingTimeSeriesChartMarker(
                 indicatorSizeDp = 36f,
                 guideline = guideline,
             ) {
-            override fun updateInsets(
+            override fun updateLayerMargins(
                 context: CartesianMeasuringContext,
-                horizontalDimensions: HorizontalDimensions,
+                layerMargins: CartesianLayerMargins,
+                layerDimensions: CartesianLayerDimensions,
                 model: CartesianChartModel,
-                insets: Insets,
             ) {
                 with(context) {
-                    val baseShadowInsetDp =
+                    val baseShadowMarginDp =
                         CLIPPING_FREE_SHADOW_RADIUS_MULTIPLIER * LABEL_BACKGROUND_SHADOW_RADIUS_DP
-                    var topInset = (baseShadowInsetDp - LABEL_BACKGROUND_SHADOW_DY_DP).pixels
-                    var bottomInset = (baseShadowInsetDp + LABEL_BACKGROUND_SHADOW_DY_DP).pixels
+                    var topMargin = (baseShadowMarginDp - LABEL_BACKGROUND_SHADOW_DY_DP).pixels
+                    var bottomMargin = (baseShadowMarginDp + LABEL_BACKGROUND_SHADOW_DY_DP).pixels
                     when (labelPosition) {
                         LabelPosition.Top,
-                        LabelPosition.AbovePoint -> topInset += label.getHeight(context) + tickSizeDp.pixels
-                        LabelPosition.Bottom -> bottomInset += label.getHeight(context) + tickSizeDp.pixels
+                        LabelPosition.AbovePoint -> topMargin += label.getHeight(context) + tickSizeDp.pixels
+                        LabelPosition.Bottom -> bottomMargin += label.getHeight(context) + tickSizeDp.pixels
                         LabelPosition.AroundPoint -> {}
                     }
-                    insets.ensureValuesAtLeast(top = topInset, bottom = bottomInset)
+                    layerMargins.ensureValuesAtLeast(top = topMargin, bottom = bottomMargin)
                 }
             }
         }
