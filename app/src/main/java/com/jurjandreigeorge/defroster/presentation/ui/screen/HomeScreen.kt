@@ -24,6 +24,7 @@ import com.jurjandreigeorge.defroster.domain.welcomeTexts
 import com.jurjandreigeorge.defroster.presentation.theme.coldColor
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.hotColor
+import com.jurjandreigeorge.defroster.presentation.ui.component.HeatingStatsCountThresholdReachedDialog
 import com.jurjandreigeorge.defroster.presentation.ui.component.MissingTempSensorCard
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
 
@@ -33,6 +34,11 @@ fun HomeScreen(
     defrosterViewModel: DefrosterViewModel
 ) {
     val welcomeText = remember { welcomeTexts.random() }
+
+    HeatingStatsCountThresholdReachedDialog(
+        defrosterViewModel = defrosterViewModel,
+        navController = navController
+    )
 
     Box(
         modifier = Modifier

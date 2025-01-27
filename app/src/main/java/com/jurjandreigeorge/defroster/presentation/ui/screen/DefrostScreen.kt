@@ -49,7 +49,7 @@ fun DefrostScreen(
             ) {
                 "Target temp. must exceed current"
             } else {
-                "Keeps temp. at ${
+                "Keeps temp. between ${
                     defrosterViewModel.targetTempLowerLimit
                 } – ${
                     defrosterViewModel.targetTempUpperLimit

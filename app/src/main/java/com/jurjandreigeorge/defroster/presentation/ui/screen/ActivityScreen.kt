@@ -78,6 +78,7 @@ fun ActivityScreen(
                     Text("Are you sure you want to delete the selected heating stats?")
                 },
                 onDismissRequest = {
+                    Log.i("Defroster Activity Screen", "Dialog request dismissed.")
                     selectedHeatingStatsIds.clear()
                     isDeleteHeatingStatsDialogOpen = false
                 },

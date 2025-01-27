@@ -26,4 +26,7 @@ interface HeatingStatsDao {
 
     @Query("DELETE FROM heating_stats WHERE id IN (:heatingStatsIds)")
     fun deleteByIds(heatingStatsIds: List<Long>): Int
+
+    @Query("SELECT count(*) FROM heating_stats")
+    fun loadCountFlow(): Flow<Int>
 }

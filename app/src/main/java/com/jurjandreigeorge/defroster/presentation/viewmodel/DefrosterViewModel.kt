@@ -42,8 +42,11 @@ class DefrosterViewModel @Inject constructor(
         getCurrentTemp = { this.currentTemp },
         currentTempSamplingPeriodSeconds = this.heatingStatsTrackerCurrentTempSamplingPeriodSeconds
     )
+    val heatingStatsCountThreshold = 1
+    var hasWarnedUserOfHeatingStatsCountThreshold by mutableStateOf(false)
 
-    val allHeatingStatsFlow: Flow<List<HeatingStatsEntity>> = heatingStatsDao.loadAllFlow()
+    val allHeatingStatsFlow: Flow<List<HeatingStatsEntity>> = this.heatingStatsDao.loadAllFlow()
+    val heatingStatsCountFlow: Flow<Int> = this.heatingStatsDao.loadCountFlow()
 
     fun toggleHeating() {
         when (this.heatingState) {
@@ -132,7 +135,7 @@ class DefrosterViewModel @Inject constructor(
                 }
                 this@DefrosterViewModel.heatingThreads.add(newHeatingThread)
             }
-            for (i in 0..<this@DefrosterViewModel.heatingThreads.size) {
+            for (i in 0..< this@DefrosterViewModel.heatingThreads.size) {
                 this@DefrosterViewModel.heatingThreads[i].start()
             }
             Log.i("Defroster", "All heating threads started.")
@@ -159,7 +162,9 @@ class DefrosterViewModel @Inject constructor(
             Log.i("Defroster", "Heating stats: ${heatingStats}.")
             this@DefrosterViewModel.heatingState = HeatingState.NOT_HEATING
             CoroutineScope(Dispatchers.IO).launch {
-                insertHeatingStatsIntoRoom(heatingStats = listOf(heatingStats))
+                this@DefrosterViewModel.insertHeatingStatsIntoRoom(
+                    heatingStats = listOf(heatingStats)
+                )
             }
         }
     }
@@ -173,7 +178,7 @@ class DefrosterViewModel @Inject constructor(
             Log.i(logTag, "No heating stats to insert.")
             return emptyList()
         }
-        val insertedRowIds = heatingStatsDao.insertAll(heatingStats)
+        val insertedRowIds = this.heatingStatsDao.insertAll(heatingStats)
         Log.i(logTag, "Inserted heating stats. Inserted row IDs: $insertedRowIds.")
         return insertedRowIds
     }
@@ -187,7 +192,7 @@ class DefrosterViewModel @Inject constructor(
             Log.i(logTag, "No heating stats to delete.")
             return 0
         }
-        val deletedHeatingStatsCount = heatingStatsDao.deleteByIds(heatingStatsIds)
+        val deletedHeatingStatsCount = this.heatingStatsDao.deleteByIds(heatingStatsIds)
         Log.i(logTag, "Deleted heating stats. Count: $deletedHeatingStatsCount.")
         return deletedHeatingStatsCount
     }
@@ -197,7 +202,7 @@ class DefrosterViewModel @Inject constructor(
             return
         }
         CoroutineScope(Dispatchers.IO).launch {
-            deleteHeatingStatsFromRoom(heatingStatsIds = heatingStatsIds)
+            this@DefrosterViewModel.deleteHeatingStatsFromRoom(heatingStatsIds = heatingStatsIds)
         }
     }
 }
