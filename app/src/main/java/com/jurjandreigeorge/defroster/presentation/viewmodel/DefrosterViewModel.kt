@@ -42,7 +42,7 @@ class DefrosterViewModel @Inject constructor(
         getCurrentTemp = { this.currentTemp },
         currentTempSamplingPeriodSeconds = this.heatingStatsTrackerCurrentTempSamplingPeriodSeconds
     )
-    val heatingStatsCountThreshold = 1
+    val heatingStatsCountThreshold = 100
     var hasWarnedUserOfHeatingStatsCountThreshold by mutableStateOf(false)
 
     val allHeatingStatsFlow: Flow<List<HeatingStatsEntity>> = this.heatingStatsDao.loadAllFlow()
