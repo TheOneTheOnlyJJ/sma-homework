@@ -19,6 +19,7 @@ import com.jurjandreigeorge.defroster.domain.HeatingState
 import com.jurjandreigeorge.defroster.presentation.theme.getBackgroundColorGradient
 import com.jurjandreigeorge.defroster.presentation.theme.getDisabledTempColor
 import com.jurjandreigeorge.defroster.presentation.theme.getTempColor
+import com.jurjandreigeorge.defroster.presentation.ui.component.HeatingStatsCountThresholdReachedDialog
 import com.jurjandreigeorge.defroster.presentation.ui.component.MissingTempSensorCard
 import com.jurjandreigeorge.defroster.presentation.viewmodel.DefrosterViewModel
 import kotlin.math.roundToInt
@@ -79,6 +80,11 @@ fun DefrostScreen(
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(canScroll = { false })
+
+    HeatingStatsCountThresholdReachedDialog(
+        defrosterViewModel = defrosterViewModel,
+        navController = navController
+    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
