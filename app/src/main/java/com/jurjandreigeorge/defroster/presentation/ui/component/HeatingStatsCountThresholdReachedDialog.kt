@@ -52,10 +52,8 @@ fun HeatingStatsCountThresholdReachedDialog(
                 },
                 text = {
                     Text(
-                        "The maximum recommended defrost stats count is " +
-                                "${defrosterViewModel.heatingStatsCountThreshold}. " +
-                                "You currently have $currentHeatingStatsCount. " +
-                                "Consider deleting older stats to save on device memory."
+                        "You currently have $currentHeatingStatsCount defrost stats. " +
+                                "Consider deleting some to free up device memory."
                     )
                 },
                 onDismissRequest = {
